@@ -5,20 +5,58 @@ on:
     - cron: '40 5 * * 0,2-6'
 permissions:
   contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: pick3-data-refresh
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: pip
-      - run: pip install -r requirements.txt
-      - run: python scripts/train.py
-      - name: Commit verified fresh results
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Train and generate official data
+        run: python scripts/train.py
+      - name: Validate generated dataset
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('web/data/predictions.json')
+          assert p.is_file(), 'Training produced no web/data/predictions.json'
+          data=json.loads(p.read_text())
+          assert set(data['games'])=={'morning','day','evening','night'}
+          for label,game in data['games'].items():
+              assert game['draws']>=160, label
+              assert len(game['probabilities'])==3, label
+              assert all(len(d)==10 and abs(sum(d)-1)<0.0001 for d in game['probabilities']), label
+          print('Validated',p,'with four draw sessions')
+          PY
+      - name: Commit new model output
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add web/data/predictions.json
-          git diff --staged --quiet || (git commit -m 'Update official Texas Pick 3 model outputs' && git push)
+          git add -f web/data/predictions.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'Update official Texas Pick 3 model outputs'
+            git push
+          fi
+      # GITHUB_TOKEN commits do not launch another push-triggered workflow.
+      # Publish here too, so refreshed predictions reach GitHub Pages.
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4
