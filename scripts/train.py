@@ -90,6 +90,15 @@ def main():
         print(game,obj['draws'],obj['last_draw'],[m['selected'] for m in obj['validation']])
     target=ROOT/'web'/'data'/'predictions.json'
     target.parent.mkdir(parents=True, exist_ok=True)
+    if target.exists():
+        try:
+            previous=json.loads(target.read_text(encoding='utf-8'))
+            if all(previous['games'][game]['last_draw']==payload['games'][game]['last_draw'] and
+                   previous['games'][game]['recent']==payload['games'][game]['recent'] for game in GAMES):
+                print('No new official draws; preserving previous model output')
+                return
+        except (ValueError, KeyError, TypeError):
+            pass
     target.write_text(json.dumps(payload,indent=2)+'\n',encoding='utf-8')
     print('wrote',target)
 if __name__=='__main__':main()
