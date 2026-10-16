@@ -89,6 +89,7 @@ def main():
         payload['games'][game]=obj
         print(game,obj['draws'],obj['last_draw'],[m['selected'] for m in obj['validation']])
     target=ROOT/'web'/'data'/'predictions.json'
+    target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(json.dumps(payload,indent=2)+'\n',encoding='utf-8')
     print('wrote',target)
 if __name__=='__main__':main()
