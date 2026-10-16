@@ -9,7 +9,10 @@ on:
       - '.github/workflows/update.yml'
   workflow_dispatch:
   schedule:
-    - cron: '40 5 * * 0,2-6'
+    # Four checks after each Texas draw, Monday-Saturday local time.
+    # UTC slots deliberately stay after the draws in both CST and CDT.
+    - cron: '0 17,20 * * 1-6'
+    - cron: '0 1,6 * * 0,2-6'
 permissions:
   contents: write
   pages: write
