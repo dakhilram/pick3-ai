@@ -18,17 +18,12 @@ on:
     - cron: '25 4,5 * * *'
 permissions:
   contents: write
-  pages: write
-  id-token: write
 concurrency:
-  group: pages
+  group: pick3-data-refresh
   cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -80,14 +75,3 @@ jobs:
             git pull --rebase origin main
             git push origin HEAD:main
           fi
-      # GITHUB_TOKEN commits do not launch another push-triggered workflow.
-      # Publish here too, so refreshed predictions reach GitHub Pages.
-      - uses: actions/configure-pages@v5
-        if: steps.gate.outputs.run == 'true'
-      - uses: actions/upload-pages-artifact@v3
-        if: steps.gate.outputs.run == 'true'
-        with:
-          path: web
-      - id: deployment
-        if: steps.gate.outputs.run == 'true'
-        uses: actions/deploy-pages@v4
