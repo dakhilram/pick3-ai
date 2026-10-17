@@ -361,7 +361,17 @@ def main():
             recent = [''.join(map(str, digits)) for _, digits in rows[-40:][::-1]]
             if payload['games'][game]['last_draw'] != latest or payload['games'][game]['recent'] != recent:
                 changed = True
-                payload['games'][game].update(last_draw=latest, recent=recent, draws=len(rows))
+                entry = payload['games'][game]
+                entry.update(last_draw=latest, recent=recent, draws=len(rows))
+                # The selected frequency model can be cheaply re-scored after every draw;
+                # heavier selected models remain unchanged until the full nightly run.
+                if entry.get('exact_any_selection', {}).get('model') == 'smoothed_frequency':
+                    digits = np.asarray([value for _, value in rows[-MAX_TRAIN:]], dtype=int)
+                    probs = [frequency(digits[:, position]).tolist() for position in range(3)]
+                    entry['probabilities'] = probs
+                    entry['model_probabilities']['smoothed_frequency'] = probs
+                    entry['exact_any_picks'] = exact_any_picks(probs)
+                    entry['forecast_refreshed_at'] = datetime.now(timezone.utc).isoformat()
         if changed:
             history_path = target.parent / 'live_history.json'
             history = json.loads(history_path.read_text()) if history_path.exists() else None
