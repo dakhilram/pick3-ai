@@ -158,6 +158,35 @@ def box_backtest(prob_by_position, truth, ks=(1, 5, 10, 20)):
     return {'coverage':coverage, 'fair_expected_coverage':fair,
             'groups':len(BOX_GROUPS)}
 
+
+def box_log_loss(position_probs, truth):
+    """Proper log score of unordered results: sum every distinct permutation's mass."""
+    by_pos = [np.asarray(p) for p in position_probs]
+    totals = []
+    for t, digits in enumerate(truth):
+        group = sorted(set(__import__('itertools').permutations(map(int, digits))))
+        mass = sum(by_pos[0][t,a] * by_pos[1][t,b] * by_pos[2][t,c]
+                   for a,b,c in group)
+        totals.append(-np.log(max(mass, EPS)))
+    return float(np.mean(totals))
+
+
+def exact_any_picks(probabilities, count=5):
+    """Rank unordered groups by Any coverage; choose best exact order within each group."""
+    import itertools
+    groups = {}
+    for a,b,c in itertools.product(range(10), repeat=3):
+        number = f'{a}{b}{c}'
+        key = ''.join(sorted(number))
+        score = float(probabilities[0][a] * probabilities[1][b] * probabilities[2][c])
+        group = groups.setdefault(key, {'score':0.,'best':number,'best_score':-1.})
+        group['score'] += score
+        if score > group['best_score'] or (score == group['best_score'] and number < group['best']):
+            group.update(best=number,best_score=score)
+    chosen = sorted(groups.values(), key=lambda g:(-g['score'],g['best']))[:count]
+    return [g['best'] for g in chosen]
+
+
 def predict_one(rows):
     if len(rows) < 700:
         raise ValueError('Insufficient historical draws')
@@ -181,6 +210,8 @@ def predict_one(rows):
     test_predictions = []
     selection = []
     alternatives = {name: [] for name in ('smoothed_frequency', 'random_forest', 'gradient_boosting', 'ensemble')}
+    validation_candidates = [{kind: [] for kind in kinds} for _ in folds]
+    test_candidates = {kind: [] for kind in kinds}
     for p in range(3):
         losses = {kind: [] for kind in kinds}
         for fold_idx, (valid_start, valid_end) in enumerate(folds):
@@ -195,6 +226,7 @@ def predict_one(rows):
                                                 fold_probs['gradient_boosting']) / 3)
             for kind, values in fold_probs.items():
                 losses[kind].append(score(values, truth))
+                validation_candidates[fold_idx][kind].append(values)
         validation_losses = {kind: float(np.mean(values)) for kind, values in losses.items()}
         best = min(kinds, key=lambda name: validation_losses[name])
         # Conservative margin: modest retrospective differences are treated as noise.
@@ -215,6 +247,8 @@ def predict_one(rows):
                                        preds['random_forest'] + preds['gradient_boosting']) / 3)
         next_preds['ensemble'] = normalize((next_preds['smoothed_frequency'] +
                                             next_preds['random_forest'] + next_preds['gradient_boosting']) / 3)
+        for kind in kinds:
+            test_candidates[kind].append(preds[kind])
         selected_test = preds[best]
         test_predictions.append(selected_test)
         output.append(normalize(next_preds[best]).round(9).tolist())
@@ -229,14 +263,33 @@ def predict_one(rows):
             'test_log_loss': round(score(selected_test, y[test_train:, p]), 5),
             'test_uniform_log_loss': round(float(np.log(10)), 5)
         })
+    # Select ONE complete model per draw session based on the correct
+    # Exact/Any matching event, without consulting the untouched test segment.
+    validation_box_losses = {kind: float(np.mean([
+        box_log_loss(validation_candidates[i][kind], y[a:b])
+        for i,(a,b) in enumerate(folds)
+    ])) for kind in kinds}
+    chosen_kind = min(kinds, key=lambda kind: validation_box_losses[kind])
+    if validation_box_losses['smoothed_frequency'] - validation_box_losses[chosen_kind] < .005:
+        chosen_kind = 'smoothed_frequency'
+    output = [alternatives[chosen_kind][p] for p in range(3)]
+    test_predictions = test_candidates[chosen_kind]
+    selection = [chosen_kind] * 3
     test_truth = y[-test_n:]
     exact = {}
     for k in (1, 5, 10, 20):
         exact[f'top_{k}'] = round(top_hit(test_predictions, test_truth, k), 5)
     boxed = box_backtest(test_predictions, test_truth)
+    chosen_exact_any = exact_any_picks(output)
+    boxed['model'] = chosen_kind
     return {'draws': len(rows), 'last_draw': rows[-1][0].date().isoformat(),
             'recent': [''.join(map(str, ds)) for _, ds in rows[-40:][::-1]],
             'probabilities': output, 'model_probabilities': alternatives, 'validation': metrics,
+            'exact_any_picks': chosen_exact_any,
+            'exact_any_selection': {'model':chosen_kind, 'validation_box_log_loss':round(validation_box_losses[chosen_kind],5),
+                                    'validation_baseline_log_loss':round(validation_box_losses['smoothed_frequency'],5),
+                                    'test_box_log_loss':round(box_log_loss(test_predictions,test_truth),5),
+                                    'candidate_box_log_loss':{k:round(v,5) for k,v in validation_box_losses.items()}},
             'holdout_draws': test_n, 'walkforward_folds': len(folds), 'selected_models': selection,
             'backtest': {'type': 'chronological unseen final test', 'draws': test_n,
                          'coverage': exact, 'straight': {'coverage': exact, 'fair_expected_coverage': {f'top_{k}':k/1000 for k in (1,5,10,20)}},
@@ -269,7 +322,7 @@ def main():
         source_rows[game] = rows
         print('Official', game, len(rows), rows[-1][0].date(), flush=True)
 
-    if previous and previous.get('schema_version') == 6:
+    if previous and previous.get('schema_version') == 7:
         try:
             if all(previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
                    and previous['games'][g]['recent'] == [
@@ -280,7 +333,7 @@ def main():
         except (KeyError, TypeError, ValueError):
             pass
 
-    payload = {'schema_version': 6, 'generated_at': datetime.now(timezone.utc).isoformat(),
+    payload = {'schema_version': 7, 'generated_at': datetime.now(timezone.utc).isoformat(),
                'source': BASE, 'games': {}}
     for game in GAMES:
         obj = predict_one(source_rows[game])
