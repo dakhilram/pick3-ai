@@ -18,6 +18,10 @@ The four CSV files come from [Texas Lottery's official downloads](https://www.te
 - GitHub Actions checks the four official archives **four times per Texas drawing day** and only writes new predictions when the source draw history changes. GitHub can delay jobs, and the draw archive itself may lag.
 - Neither AI architecture nor pattern mining can reliably predict a fair lottery; model scores are exploratory and are **not calibrated probabilities of winning**.
 
+## Optional heavy model lab on your laptop
+
+The full optional XGBoost/LightGBM tournament is developed in GitHub but runs **locally only**. It evaluates five $1 Exact/Any tickets on chronological validation and untouched test draws without changing website predictions. See [setup instructions](docs/OFFLINE_LAB.md). The normal GitHub Actions pipeline continues independently to check official draw results and train the lightweight production model once per drawing day.
+
 ## Run locally
 
 ```bash
