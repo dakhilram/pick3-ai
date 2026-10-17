@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
+from live_tracker import reconcile, save_atomic
 from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
 
 BASE = 'https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/'
@@ -261,9 +262,14 @@ def main():
         print(game, len(rows), rows[-1][0].date(), flush=True)
     target = ROOT / 'web' / 'data' / 'predictions.json'
     target.parent.mkdir(parents=True, exist_ok=True)
+    previous = None
     if target.exists():
         try:
             previous = json.loads(target.read_text(encoding='utf-8'))
+        except (ValueError, OSError):
+            previous = None
+    if previous is not None:
+        try:
             if previous.get('schema_version') == 4 and all(
                 previous['games'][g]['last_draw'] == payload['games'][g]['last_draw'] and
                 previous['games'][g]['recent'] == payload['games'][g]['recent']
@@ -273,10 +279,14 @@ def main():
                 return
         except (KeyError, ValueError, TypeError):
             pass
-    import os
-    temporary = target.with_suffix('.json.tmp')
-    temporary.write_text(json.dumps(payload, indent=2, allow_nan=False) + '\n', encoding='utf-8')
-    os.replace(temporary, target)
+    live_path = target.parent / 'live_history.json'
+    try:
+        history = json.loads(live_path.read_text(encoding='utf-8')) if live_path.exists() else None
+    except (ValueError, OSError):
+        history = None
+    new_history = reconcile(previous, payload, history)
+    save_atomic(live_path, new_history)
+    save_atomic(target, payload)
     print('Generated', target)
 
 
