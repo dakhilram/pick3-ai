@@ -16,7 +16,7 @@ BASE = 'https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_N
 GAMES = ('morning', 'day', 'evening', 'night')
 ROOT = Path(__file__).resolve().parents[1]
 WINDOW = 60
-MAX_TRAIN = 2600
+MAX_TRAIN = 1800
 LABELS = np.arange(10)
 EPS = 1e-8
 
@@ -97,10 +97,10 @@ def full_prob(model, X):
 
 def make_model(kind, seed):
     if kind == 'random_forest':
-        return RandomForestClassifier(n_estimators=80, max_depth=7,
+        return RandomForestClassifier(n_estimators=60, max_depth=7,
                                       min_samples_leaf=12, random_state=seed, n_jobs=2)
     if kind == 'gradient_boosting':
-        return HistGradientBoostingClassifier(max_iter=85, max_leaf_nodes=12,
+        return HistGradientBoostingClassifier(max_iter=45, max_leaf_nodes=12,
                                               l2_regularization=8, min_samples_leaf=30,
                                               learning_rate=.04, random_state=seed)
     raise ValueError(kind)
