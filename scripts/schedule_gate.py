@@ -28,4 +28,5 @@ if __name__ == "__main__":
     if path:
         with open(path, "a", encoding="utf-8") as out:
             out.write(f"run={'true' if allowed else 'false'}\n")
+            out.write(f"train={'true' if train else 'false'}\n")
     print(f"Houston {local.isoformat()}; {event}; update={allowed}; train={train}")
