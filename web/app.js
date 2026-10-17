@@ -91,7 +91,11 @@ function render(){
   }));
   const b=g.backtest;
   const report=(play==="box"||play==="combo")?b?.box:b?.straight;
-  $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"||play==="combo"?"Unique Any Order / Combo group":"Exact Order"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`: "This play-type backtest is not published yet. Await the next model refresh.";
+  if(play==="both"&&b?.straight&&b?.box){
+    $("backtest").textContent=`Exact/Any on unseen ${b.draws} draws: Exact top 10 ${(100*b.straight.coverage.top_10).toFixed(2)}% (fair 1%); Any-order reference top 10 groups ${(100*b.box.coverage.top_10).toFixed(2)}% (fair ${(100*b.box.fair_expected_coverage.top_10).toFixed(2)}%). These are separate rankings, not a combined ticket-level backtest.`;
+  } else {
+    $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"||play==="combo"?"Unique Any Order / Combo group":"Exact Order"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`:"This play-type backtest is not published yet. Await the next model refresh.";
+  }
   $("alert").className="alert ok";
   $("alert").textContent=`Showing ${name} research through ${g.last_draw}. Dataset generated ${new Date(dataset.generated_at).toLocaleString()}. ${strategy==="model"?"Automatic validation-selected models.":"Exploratory ranking: "+$("strategy").selectedOptions[0].textContent+"."} Historical patterns are not verified winning odds.`;
  }catch(e){visible=[];$("alert").className="alert error";$("alert").textContent=e.message;}
