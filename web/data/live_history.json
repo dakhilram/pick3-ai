@@ -84,6 +84,34 @@
         "exact_any_fair_probability": 0.03,
         "box_fair_probability": 0.03
       }
+    ],
+    "evening": [
+      {
+        "draw_date": "2026-10-17",
+        "published_prediction_at": "2026-10-17T21:31:44.872127+00:00",
+        "last_known_draw": "2026-10-16",
+        "actual": "872",
+        "exact_picks": [
+          "590",
+          "390",
+          "190",
+          "790",
+          "503"
+        ],
+        "box_picks": [
+          "059",
+          "039",
+          "019",
+          "079",
+          "035"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
+        "box_fair_probability": 0.03
+      }
     ]
   }
 }
