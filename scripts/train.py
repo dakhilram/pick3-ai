@@ -269,7 +269,7 @@ def main():
         source_rows[game] = rows
         print('Official', game, len(rows), rows[-1][0].date(), flush=True)
 
-    if previous and previous.get('schema_version') == 5:
+    if previous and previous.get('schema_version') == 6:
         try:
             if all(previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
                    and previous['games'][g]['recent'] == [
@@ -280,7 +280,7 @@ def main():
         except (KeyError, TypeError, ValueError):
             pass
 
-    payload = {'schema_version': 5, 'generated_at': datetime.now(timezone.utc).isoformat(),
+    payload = {'schema_version': 6, 'generated_at': datetime.now(timezone.utc).isoformat(),
                'source': BASE, 'games': {}}
     for game in GAMES:
         obj = predict_one(source_rows[game])
