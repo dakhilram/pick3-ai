@@ -1,0 +1,16 @@
+{
+  "name": "PICK3 AI — Texas Pick 3 Research",
+  "short_name": "PICK3 AI",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#080f1c",
+  "theme_color": "#79ddbd",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
