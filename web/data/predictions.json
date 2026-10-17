@@ -1,5 +1,6 @@
 {
-  "generated_at": "2026-10-16T23:48:32.577487+00:00",
+  "schema_version": 2,
+  "generated_at": "2026-10-17T00:10:03.886790+00:00",
   "source": "https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/",
   "games": {
     "morning": {
@@ -49,63 +50,109 @@
       ],
       "probabilities": [
         [
-          0.099189786,
-          0.095015959,
-          0.109010557,
-          0.098698748,
-          0.101153941,
-          0.095015959,
-          0.100908421,
-          0.109010557,
-          0.099189786,
-          0.092806285
+          0.108839779,
+          0.098895028,
+          0.10718232,
+          0.099447514,
+          0.101657459,
+          0.091712707,
+          0.096685083,
+          0.106077348,
+          0.092265193,
+          0.097237569
         ],
         [
-          0.100417383,
-          0.096243555,
-          0.108765038,
-          0.102872575,
-          0.094279401,
-          0.098207709,
-          0.095506997,
-          0.096489074,
-          0.10459121,
-          0.102627056
+          0.111049724,
+          0.091712707,
+          0.101657459,
+          0.098895028,
+          0.086740331,
+          0.102209945,
+          0.106077348,
+          0.095027624,
+          0.10441989,
+          0.102209945
         ],
         [
-          0.097225632,
-          0.103118095,
-          0.100662902,
-          0.101890498,
-          0.106555365,
-          0.099680825,
-          0.091824208,
-          0.092069727,
-          0.110238154,
-          0.096734594
+          0.098342541,
+          0.102762431,
+          0.109392265,
+          0.096132597,
+          0.108839779,
+          0.104972376,
+          0.095027624,
+          0.09281768,
+          0.098895028,
+          0.09281768
         ]
       ],
       "validation": [
         {
           "position": 1,
-          "model_log_loss": 2.3082,
-          "baseline_log_loss": 2.3028,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.3117,
+          "model_log_loss": 2.33356,
+          "baseline_log_loss": 2.3117,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.3117,
+            "random_forest": 2.33356,
+            "gradient_boosting": 2.37984,
+            "ensemble": 2.32784
+          },
+          "test_log_loss": 2.30223,
+          "test_uniform_log_loss": 2.30259
         },
         {
           "position": 2,
-          "model_log_loss": 2.3122,
-          "baseline_log_loss": 2.307,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.31523,
+          "model_log_loss": 2.32614,
+          "baseline_log_loss": 2.31523,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.31523,
+            "random_forest": 2.32614,
+            "gradient_boosting": 2.38335,
+            "ensemble": 2.32747
+          },
+          "test_log_loss": 2.3026,
+          "test_uniform_log_loss": 2.30259
         },
         {
           "position": 3,
-          "model_log_loss": 2.3081,
-          "baseline_log_loss": 2.3011,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.31145,
+          "model_log_loss": 2.3293,
+          "baseline_log_loss": 2.31145,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.31145,
+            "random_forest": 2.3293,
+            "gradient_boosting": 2.38026,
+            "ensemble": 2.32818
+          },
+          "test_log_loss": 2.30075,
+          "test_uniform_log_loss": 2.30259
         }
       ],
-      "holdout_draws": 813,
+      "holdout_draws": 300,
+      "walkforward_folds": 2,
+      "selected_models": [
+        "smoothed_frequency",
+        "smoothed_frequency",
+        "smoothed_frequency"
+      ],
+      "backtest": {
+        "type": "chronological unseen final test",
+        "draws": 300,
+        "coverage": {
+          "top_1": 0.0,
+          "top_5": 0.00333,
+          "top_10": 0.01,
+          "top_20": 0.01667
+        },
+        "uniform_expected_top_10": 0.01,
+        "mean_position_log_loss": 2.30186,
+        "uniform_position_log_loss": 2.30259
+      },
       "source_url": "https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/pick3morning.csv"
     },
     "day": {
@@ -155,63 +202,109 @@
       ],
       "probabilities": [
         [
-          0.097890185,
-          0.106408072,
-          0.103394051,
-          0.095007207,
-          0.100380029,
-          0.099200629,
-          0.102083606,
-          0.097628096,
-          0.099593762,
-          0.098414362
+          0.102762431,
+          0.109392265,
+          0.09281768,
+          0.095027624,
+          0.100552486,
+          0.090055249,
+          0.101104972,
+          0.11160221,
+          0.098342541,
+          0.098342541
         ],
         [
-          0.097366007,
-          0.09775914,
-          0.099331673,
-          0.098021229,
-          0.094220941,
-          0.10247674,
-          0.097628096,
-          0.10129734,
-          0.104835539,
-          0.107063294
+          0.100552486,
+          0.103314917,
+          0.098895028,
+          0.109944751,
+          0.086740331,
+          0.087845304,
+          0.108839779,
+          0.092265193,
+          0.10441989,
+          0.10718232
         ],
         [
-          0.103525095,
-          0.104835539,
-          0.096579741,
-          0.100380029,
-          0.101821517,
-          0.098807496,
-          0.094614074,
-          0.10129734,
-          0.10129734,
-          0.096841829
+          0.099447514,
+          0.098895028,
+          0.101104972,
+          0.10718232,
+          0.093922652,
+          0.116022099,
+          0.081767956,
+          0.098342541,
+          0.101104972,
+          0.102209945
         ]
       ],
       "validation": [
         {
           "position": 1,
-          "model_log_loss": 2.3041,
-          "baseline_log_loss": 2.3039,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.30946,
+          "model_log_loss": 2.3278,
+          "baseline_log_loss": 2.30946,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.30946,
+            "random_forest": 2.3278,
+            "gradient_boosting": 2.35499,
+            "ensemble": 2.31789
+          },
+          "test_log_loss": 2.30556,
+          "test_uniform_log_loss": 2.30259
         },
         {
           "position": 2,
-          "model_log_loss": 2.3066,
-          "baseline_log_loss": 2.3047,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.30454,
+          "model_log_loss": 2.31893,
+          "baseline_log_loss": 2.30454,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.30454,
+            "random_forest": 2.31893,
+            "gradient_boosting": 2.38198,
+            "ensemble": 2.32123
+          },
+          "test_log_loss": 2.30091,
+          "test_uniform_log_loss": 2.30259
         },
         {
           "position": 3,
-          "model_log_loss": 2.3091,
-          "baseline_log_loss": 2.3047,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.30313,
+          "model_log_loss": 2.31597,
+          "baseline_log_loss": 2.30313,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.30313,
+            "random_forest": 2.31597,
+            "gradient_boosting": 2.35974,
+            "ensemble": 2.31238
+          },
+          "test_log_loss": 2.30389,
+          "test_uniform_log_loss": 2.30259
         }
       ],
-      "holdout_draws": 1525,
+      "holdout_draws": 300,
+      "walkforward_folds": 2,
+      "selected_models": [
+        "smoothed_frequency",
+        "smoothed_frequency",
+        "smoothed_frequency"
+      ],
+      "backtest": {
+        "type": "chronological unseen final test",
+        "draws": 300,
+        "coverage": {
+          "top_1": 0.0,
+          "top_5": 0.01,
+          "top_10": 0.01333,
+          "top_20": 0.04333
+        },
+        "uniform_expected_top_10": 0.01,
+        "mean_position_log_loss": 2.30345,
+        "uniform_position_log_loss": 2.30259
+      },
       "source_url": "https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/pick3day.csv"
     },
     "evening": {
@@ -261,63 +354,109 @@
       ],
       "probabilities": [
         [
-          0.096489074,
-          0.100171863,
-          0.105082249,
-          0.100417383,
-          0.093051805,
-          0.104100172,
-          0.096243555,
-          0.102872575,
-          0.099926344,
-          0.101644979
+          0.097237569,
+          0.102762431,
+          0.104972376,
+          0.1,
+          0.088950276,
+          0.109944751,
+          0.098342541,
+          0.101657459,
+          0.09558011,
+          0.100552486
         ],
         [
-          0.104100172,
-          0.103363614,
-          0.094279401,
-          0.097225632,
-          0.096243555,
-          0.098944267,
-          0.095506997,
-          0.102136018,
-          0.099926344,
-          0.108274
+          0.110497238,
+          0.104972376,
+          0.092265193,
+          0.100552486,
+          0.090055249,
+          0.100552486,
+          0.092265193,
+          0.102762431,
+          0.093370166,
+          0.112707182
         ],
         [
-          0.103854653,
-          0.100417383,
-          0.098453229,
-          0.104100172,
-          0.095015959,
-          0.096734594,
-          0.098944267,
-          0.099926344,
-          0.105082249,
-          0.097471151
+          0.106629834,
+          0.096685083,
+          0.096685083,
+          0.105524862,
+          0.09558011,
+          0.097790055,
+          0.105524862,
+          0.098342541,
+          0.097790055,
+          0.099447514
         ]
       ],
       "validation": [
         {
           "position": 1,
-          "model_log_loss": 2.305,
-          "baseline_log_loss": 2.3024,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.31105,
+          "model_log_loss": 2.33384,
+          "baseline_log_loss": 2.31105,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.31105,
+            "random_forest": 2.33384,
+            "gradient_boosting": 2.37098,
+            "ensemble": 2.3242
+          },
+          "test_log_loss": 2.30857,
+          "test_uniform_log_loss": 2.30259
         },
         {
           "position": 2,
-          "model_log_loss": 2.3059,
-          "baseline_log_loss": 2.3027,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.30464,
+          "model_log_loss": 2.32375,
+          "baseline_log_loss": 2.30464,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.30464,
+            "random_forest": 2.32375,
+            "gradient_boosting": 2.36299,
+            "ensemble": 2.31727
+          },
+          "test_log_loss": 2.30205,
+          "test_uniform_log_loss": 2.30259
         },
         {
           "position": 3,
-          "model_log_loss": 2.3077,
-          "baseline_log_loss": 2.3051,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.30591,
+          "model_log_loss": 2.3201,
+          "baseline_log_loss": 2.30591,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.30591,
+            "random_forest": 2.3201,
+            "gradient_boosting": 2.36561,
+            "ensemble": 2.31733
+          },
+          "test_log_loss": 2.30326,
+          "test_uniform_log_loss": 2.30259
         }
       ],
-      "holdout_draws": 813,
+      "holdout_draws": 300,
+      "walkforward_folds": 2,
+      "selected_models": [
+        "smoothed_frequency",
+        "smoothed_frequency",
+        "smoothed_frequency"
+      ],
+      "backtest": {
+        "type": "chronological unseen final test",
+        "draws": 300,
+        "coverage": {
+          "top_1": 0.00333,
+          "top_5": 0.00667,
+          "top_10": 0.01,
+          "top_20": 0.01667
+        },
+        "uniform_expected_top_10": 0.01,
+        "mean_position_log_loss": 2.30463,
+        "uniform_position_log_loss": 2.30259
+      },
       "source_url": "https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/pick3evening.csv"
     },
     "night": {
@@ -367,63 +506,109 @@
       ],
       "probabilities": [
         [
-          0.098989703,
-          0.097726831,
-          0.098406839,
-          0.101904022,
-          0.097046823,
-          0.099572567,
-          0.103264037,
-          0.102389742,
-          0.100446862,
-          0.100252574
+          0.091712707,
+          0.099447514,
+          0.098342541,
+          0.116022099,
+          0.095027624,
+          0.101657459,
+          0.093922652,
+          0.10718232,
+          0.093370166,
+          0.103314917
         ],
         [
-          0.097046823,
-          0.099378279,
-          0.098115407,
-          0.099572567,
-          0.103069749,
-          0.100058286,
-          0.096949679,
-          0.104526909,
-          0.101029726,
-          0.100252574
+          0.102209945,
+          0.092265193,
+          0.096685083,
+          0.090607735,
+          0.11160221,
+          0.10441989,
+          0.09558011,
+          0.10718232,
+          0.10718232,
+          0.092265193
         ],
         [
-          0.098115407,
-          0.103846901,
-          0.101418302,
-          0.099281135,
-          0.101806878,
-          0.095881096,
-          0.101709734,
-          0.099183991,
-          0.099961142,
-          0.098795415
+          0.097790055,
+          0.105524862,
+          0.106629834,
+          0.095027624,
+          0.103867403,
+          0.097790055,
+          0.103314917,
+          0.09281768,
+          0.100552486,
+          0.096685083
         ]
       ],
       "validation": [
         {
           "position": 1,
-          "model_log_loss": 2.3039,
-          "baseline_log_loss": 2.3031,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.30757,
+          "model_log_loss": 2.32044,
+          "baseline_log_loss": 2.30757,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.30757,
+            "random_forest": 2.32044,
+            "gradient_boosting": 2.36622,
+            "ensemble": 2.31868
+          },
+          "test_log_loss": 2.30459,
+          "test_uniform_log_loss": 2.30259
         },
         {
           "position": 2,
-          "model_log_loss": 2.3051,
-          "baseline_log_loss": 2.3033,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.30696,
+          "model_log_loss": 2.31419,
+          "baseline_log_loss": 2.30696,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.30696,
+            "random_forest": 2.31419,
+            "gradient_boosting": 2.36305,
+            "ensemble": 2.31184
+          },
+          "test_log_loss": 2.30392,
+          "test_uniform_log_loss": 2.30259
         },
         {
           "position": 3,
-          "model_log_loss": 2.3059,
-          "baseline_log_loss": 2.3024,
-          "selected": "smoothed_frequency"
+          "selected": "smoothed_frequency",
+          "validation_log_loss": 2.31154,
+          "model_log_loss": 2.33436,
+          "baseline_log_loss": 2.31154,
+          "candidate_log_loss": {
+            "smoothed_frequency": 2.31154,
+            "random_forest": 2.33436,
+            "gradient_boosting": 2.39418,
+            "ensemble": 2.33287
+          },
+          "test_log_loss": 2.30435,
+          "test_uniform_log_loss": 2.30259
         }
       ],
-      "holdout_draws": 2057,
+      "holdout_draws": 300,
+      "walkforward_folds": 2,
+      "selected_models": [
+        "smoothed_frequency",
+        "smoothed_frequency",
+        "smoothed_frequency"
+      ],
+      "backtest": {
+        "type": "chronological unseen final test",
+        "draws": 300,
+        "coverage": {
+          "top_1": 0.0,
+          "top_5": 0.00333,
+          "top_10": 0.00667,
+          "top_20": 0.02
+        },
+        "uniform_expected_top_10": 0.01,
+        "mean_position_log_loss": 2.30429,
+        "uniform_position_log_loss": 2.30259
+      },
       "source_url": "https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/pick3night.csv"
     }
   }
