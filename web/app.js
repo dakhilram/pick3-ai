@@ -152,7 +152,7 @@ function render(){
   const mlSelected=(g.selected_models||g.validation.map(m=>m.selected)).filter(m=>m!=="smoothed_frequency").length;
   $("confidenceTitle").textContent=g.exact_any_selection?"Selected for this session: "+g.exact_any_selection.model.replaceAll("_"," "):(mlSelected?"Models selected for "+mlSelected+" of 3 digit positions":"Historical frequency baseline selected");
   $("confidenceDetail").textContent="This is validation-based model selection, not a reliable winning-confidence percentage. The same 3 digits can be used for Exact, Any or Exact/Any; matching rules and ticket costs differ. FIREBALL is optional and not scored.";
-  $("confidenceBacktest").textContent=g.backtest?.box?.coverage?.top_5!=null?percent(g.backtest.box.coverage.top_5):"—";
+  $("confidenceBacktest").textContent=g.backtest?.exact_any?.any_hit_rate!=null?percent(g.backtest.exact_any.any_hit_rate):"—";
   const selected=g.selected_models||g.validation.map(m=>m.selected);
   $("performance").textContent=selected.filter(m=>m!=="smoothed_frequency").length+" / 3";
   const freq=frequencies(g.recent),max=Math.max(1,...freq);
@@ -172,8 +172,9 @@ function render(){
   }));
   const b=g.backtest;
   const report=(play==="box"||play==="combo"||play==="both")?b?.box:b?.straight;
-  if(play==="both"&&b?.straight&&b?.box){
-    $("backtest").textContent=`Exact/Any on unseen ${b.draws} draws: Exact top 5 ${(100*b.straight.coverage.top_5).toFixed(2)}% (fair 0.50%); Any-order top 5 groups ${(100*b.box.coverage.top_5).toFixed(2)}% (fair ${(100*b.box.fair_expected_coverage.top_5).toFixed(2)}%). Any-order groups correspond to the displayed Exact/Any play; the test does not account for payouts.`;
+  if(play==="both"&&b?.exact_any){
+    const m=b.exact_any;
+    $("backtest").textContent=`Exact/Any tickets · ${m.draws} unseen draws · Top 5 exact matches: ${m.exact_matches} (${percent(m.exact_hit_rate)}; fair ${percent(m.fair_exact_rate)}) · Any-order matches: ${m.any_matches} (${percent(m.any_hit_rate)}; fair ${percent(m.fair_any_rate)}). Same five ticket ranking rules as the dashboard. Payouts not included.`;
   } else {
     $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"||play==="combo"?"Unique Any Order / Combo group":"Exact Order"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`:"This play-type backtest is not published yet. Await the next model refresh.";
   }
