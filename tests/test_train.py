@@ -135,3 +135,17 @@ class Tests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class OfflineLabTests(unittest.TestCase):
+    def test_laptop_baselines_and_ticket_scoring(self):
+        from offline_lab import fit_predict, CANDIDATES
+        X = np.zeros((140, 487))
+        y = np.tile(np.array([[1, 2, 3]]), (140, 1))
+        for kind in ('frequency', 'short_frequency'):
+            scores = fit_predict(kind, X[:120], y[:120], X[120:])
+            self.assertEqual(len(scores), 3)
+            self.assertEqual(scores[0].shape, (20, 10))
+            self.assertAlmostEqual(scores[0][0].sum(), 1.0)
+        self.assertIn('xgboost', CANDIDATES)
+        self.assertIn('lightgbm', CANDIDATES)
