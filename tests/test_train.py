@@ -6,6 +6,8 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from train import parse, features, build, frequency, normalize, top_hit, make_model, BOX_GROUPS, box_backtest
 from live_tracker import ordered_picks, box_picks, reconcile, permutations
+from schedule_gate import should_check, HOUSTON, CHECKS
+from datetime import datetime
 
 
 class Tests(unittest.TestCase):
@@ -95,6 +97,18 @@ class Tests(unittest.TestCase):
         newX,newY=build(rows[-(35+60):])
         self.assertTrue(np.array_equal(oldX[-35:],newX))
         self.assertTrue(np.array_equal(oldY[-35:],newY))
+
+    def test_houston_schedule_across_dst_and_sundays(self):
+        # Every target must run in BOTH standard and daylight time.
+        for month in (1, 7):
+            for hour, minute in CHECKS:
+                local = datetime(2026, month, 17 if month == 1 else 18,
+                                 hour, minute, tzinfo=HOUSTON)
+                self.assertTrue(should_check(local), (month, hour, minute))
+        sunday = datetime(2026, 1, 18, 10, 35, tzinfo=HOUSTON)
+        self.assertFalse(should_check(sunday))
+        self.assertTrue(should_check(sunday, event="workflow_dispatch"))
+        self.assertFalse(should_check(datetime(2026,1,17,9,30,tzinfo=HOUSTON)))
 
     def test_models_build(self):
         self.assertIsNotNone(make_model('random_forest', 1))
