@@ -221,7 +221,7 @@ function render(){
     $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"||play==="combo"?"Unique Any Order / Combo group":"Exact Order"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`:"This play-type backtest is not published yet. Await the next model refresh.";
   }
   $("alert").className="alert ok";
-  $("alert").textContent=`Showing ${name} research through ${g.last_draw}. Model trained ${houstonTime(dataset.generated_at)}. Official results checked ${houstonTime(dataset.official_checked_at||dataset.generated_at)}. ${strategy==="model"?"Automatic validation-selected models.":"Exploratory ranking: "+$("strategy").selectedOptions[0].textContent+"."} Historical patterns are not verified winning odds.`;
+  $("alert").textContent=`Showing ${name} research through ${g.last_draw}. Model trained ${houstonTime(dataset.generated_at)}.${g.forecast_refreshed_at?" Picks recalculated "+houstonTime(g.forecast_refreshed_at)+".":""} Official results checked ${houstonTime(dataset.official_checked_at||dataset.generated_at)}. ${strategy==="model"?"Automatic validation-selected models.":"Exploratory ranking: "+$("strategy").selectedOptions[0].textContent+"."} Historical patterns are not verified winning odds.`;
  }catch(e){visible=[];$("alert").className="alert error";$("alert").textContent=e.message;}
 }
 async function boot(announce=false){
