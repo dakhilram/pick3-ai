@@ -118,6 +118,47 @@ async function loadLive(){
  renderLive();
 }
 
+
+// Laptop research results are independent of the production model and of live draw tracking.
+let labReport = null;
+const labNames = {frequency:"Historical Frequency",short_frequency:"Short-term Frequency",random_forest:"Random Forest",gradient_boosting:"Gradient Boosting",ensemble:"Ensemble",xgboost:"XGBoost",lightgbm:"LightGBM"};
+function renderLab(){
+ if(!labReport)return;
+ const name=$("draw").value, game=labReport.sessions?.[name];
+ if(!game)return;
+ const models=game.models, selected=game.selected_on_validation;
+ let totalHits=0,totalTests=0;
+ for(const session of Object.values(labReport.sessions)){
+  totalHits+=session.models[session.selected_on_validation].any_matches;
+  totalTests+=session.draws_tested;
+ }
+ $("labOverall").textContent=percent(totalHits/totalTests);
+ $("labSelected").textContent=labNames[selected]||selected;
+ const chosen=models[selected];
+ $("labHit").textContent=percent(chosen.any_matches/game.draws_tested);
+ $("labHitCount").textContent=chosen.any_matches+" of "+game.draws_tested+" held-out matches; fair ~3%";
+ $("labExact").textContent=percent(chosen.exact_matches/game.draws_tested);
+ $("labExactCount").textContent=chosen.exact_matches+" exact hits; fair ~0.50%";
+ $("labTimestamp").textContent="Laptop experiment dated "+houstonTime(labReport.created_at)+". Results are historical, not a forecast accuracy guarantee. This experiment does not change today's recommended numbers.";
+ $("labModels").replaceChildren(...Object.entries(models).sort((a,b)=>a[1].validation_loss-b[1].validation_loss).map(([id,model])=>{
+  const row=document.createElement("div");row.className="live-row";
+  const label=document.createElement("span");label.textContent=(labNames[id]||id)+(id===selected?" · SELECTED":"");
+  const value=document.createElement("strong");value.textContent=percent(model.any_matches/game.draws_tested);
+  const desc=document.createElement("small");desc.textContent=model.any_matches+"/"+game.draws_tested+" Exact/Any · "+model.exact_matches+" Exact · validation loss "+model.validation_loss.toFixed(4);
+  row.append(label,value,desc);return row;
+ }));
+}
+async function loadLab(){
+ try{
+  const response=await fetch("data/laptop_results.json",{cache:"no-store"});
+  if(!response.ok)throw Error("Laptop report not published");
+  const report=await response.json();
+  if(!report.sessions||!report.sessions.morning||!report.sessions.night)throw Error("Incomplete tournament report");
+  labReport=report;
+  renderLab();
+ }catch(error){$("labModels").textContent="Laptop experiment report unavailable; normal predictions are unaffected."}
+}
+
 function render(){
  if(!dataset)return;
  const name=$("draw").value, strategy=$("strategy").value;
@@ -146,6 +187,7 @@ function render(){
   }));
   $("total").textContent=g.draws.toLocaleString();
   renderLive();
+  renderLab();
   $("last").textContent=g.recent[0];
   $("lastDate").textContent=g.last_draw;
   $("holdout").textContent=g.holdout_draws.toLocaleString();
@@ -215,4 +257,5 @@ $("copy").addEventListener("click",async()=>{
  setTimeout(()=>$("copy").textContent="Copy displayed combinations",1600);
 });
 $("refreshData").addEventListener("click",async()=>{const btn=$("refreshData");btn.disabled=true;btn.textContent="Checking…";try{await boot(true);}finally{btn.disabled=false;btn.textContent="↻ Check latest results";}});
+loadLab();
 boot();
