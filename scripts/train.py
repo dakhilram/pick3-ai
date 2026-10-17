@@ -123,6 +123,39 @@ def top_hit(prob_by_position, truth, k):
     return float(np.mean(np.any(idx == actual[:, None], axis=1)))
 
 
+
+def box_groups():
+    """220 unique unordered triples; each stores all 1/3/6 straight indices."""
+    from itertools import combinations_with_replacement, permutations
+    return [(tuple(digits), np.asarray(sorted({100*a+10*b+c for a,b,c in permutations(digits)}), dtype=int))
+            for digits in combinations_with_replacement(range(10), 3)]
+
+
+BOX_GROUPS = box_groups()
+
+
+def box_backtest(prob_by_position, truth, ks=(1, 5, 10, 20)):
+    """Rank unique box groups by summed permutation masses, score actual unordered result."""
+    universe = np.asarray([(i,j,k) for i in range(10) for j in range(10)
+                           for k in range(10)], dtype=int)
+    probs = (prob_by_position[0][:, universe[:,0]] *
+             prob_by_position[1][:, universe[:,1]] *
+             prob_by_position[2][:, universe[:,2]])
+    masses = np.column_stack([probs[:, indexes].sum(axis=1) for _,indexes in BOX_GROUPS])
+    # Stable deterministic tie handling: canonical ascending triple.
+    ranked = np.argsort(-masses, axis=1, kind='stable')
+    truth_labels = [tuple(sorted(map(int, row))) for row in truth]
+    lookup = {digits:i for i,(digits,_) in enumerate(BOX_GROUPS)}
+    targets = np.asarray([lookup[d] for d in truth_labels])
+    coverage, fair = {}, {}
+    sizes = np.asarray([len(indices) for _,indices in BOX_GROUPS])
+    for k in ks:
+        chosen = ranked[:, :k]
+        coverage[f'top_{k}'] = round(float(np.mean(np.any(chosen == targets[:,None], axis=1))), 5)
+        fair[f'top_{k}'] = round(float(np.mean(sizes[chosen].sum(axis=1)/1000)), 5)
+    return {'coverage':coverage, 'fair_expected_coverage':fair,
+            'groups':len(BOX_GROUPS)}
+
 def predict_one(rows):
     if len(rows) < 700:
         raise ValueError('Insufficient historical draws')
@@ -198,12 +231,14 @@ def predict_one(rows):
     exact = {}
     for k in (1, 5, 10, 20):
         exact[f'top_{k}'] = round(top_hit(test_predictions, test_truth, k), 5)
+    boxed = box_backtest(test_predictions, test_truth)
     return {'draws': len(rows), 'last_draw': rows[-1][0].date().isoformat(),
             'recent': [''.join(map(str, ds)) for _, ds in rows[-40:][::-1]],
             'probabilities': output, 'model_probabilities': alternatives, 'validation': metrics,
             'holdout_draws': test_n, 'walkforward_folds': len(folds), 'selected_models': selection,
             'backtest': {'type': 'chronological unseen final test', 'draws': test_n,
-                         'coverage': exact,
+                         'coverage': exact, 'straight': {'coverage': exact, 'fair_expected_coverage': {f'top_{k}':k/1000 for k in (1,5,10,20)}},
+                         'box': boxed,
                          'uniform_expected_top_10': .01,
                          'mean_position_log_loss': round(float(np.mean(
                              [m['test_log_loss'] for m in metrics])), 5),
@@ -211,7 +246,7 @@ def predict_one(rows):
 
 
 def main():
-    payload = {'schema_version': 3, 'generated_at': datetime.now(timezone.utc).isoformat(),
+    payload = {'schema_version': 4, 'generated_at': datetime.now(timezone.utc).isoformat(),
                'source': BASE, 'games': {}}
     for game in GAMES:
         url = BASE + f'pick3{game}.csv'
@@ -229,7 +264,7 @@ def main():
     if target.exists():
         try:
             previous = json.loads(target.read_text(encoding='utf-8'))
-            if previous.get('schema_version') == 3 and all(
+            if previous.get('schema_version') == 4 and all(
                 previous['games'][g]['last_draw'] == payload['games'][g]['last_draw'] and
                 previous['games'][g]['recent'] == payload['games'][g]['recent']
                 for g in GAMES
