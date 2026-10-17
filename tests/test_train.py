@@ -81,6 +81,21 @@ class Tests(unittest.TestCase):
         self.assertEqual(len(ordered_picks(uniform)),5)
         self.assertEqual(len(box_picks(uniform)),5)
 
+    def test_straight_tie_ranking_matches_dashboard(self):
+        uniform=np.full((1,10),.1)
+        # 000 wins a stable tied ranking, but 999 cannot be in first five.
+        self.assertEqual(top_hit([uniform]*3,np.asarray([[0,0,0]]),5),1.0)
+        self.assertEqual(top_hit([uniform]*3,np.asarray([[9,9,9]]),5),0.0)
+
+    def test_bounded_features_equivalence(self):
+        from datetime import datetime, timedelta
+        rows=[(datetime(2020,1,1)+timedelta(days=i),(i%10,(i+3)%10,(i+6)%10))
+              for i in range(110)]
+        oldX,oldY=build(rows)
+        newX,newY=build(rows[-(35+60):])
+        self.assertTrue(np.array_equal(oldX[-35:],newX))
+        self.assertTrue(np.array_equal(oldY[-35:],newY))
+
     def test_models_build(self):
         self.assertIsNotNone(make_model('random_forest', 1))
         self.assertIsNotNone(make_model('gradient_boosting', 1))
