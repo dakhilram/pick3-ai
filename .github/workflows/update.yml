@@ -9,12 +9,13 @@ on:
       - '.github/workflows/update.yml'
   workflow_dispatch:
   schedule:
-    # Four checks after each Texas draw, Monday-Saturday local time.
-    # UTC slots deliberately stay after the draws in both CST and CDT.
-    - cron: '0 17,20 * * 1-6'
-    - cron: '0 1,6 * * 0,2-6'
-    # Earlier late-night checks in both Houston daylight and standard time.
-    - cron: '40 4,5 * * 0,2-6'
+    # UTC triggers cover BOTH CDT and CST; timezone gate below executes
+    # precisely two post-draw checks for each of four Houston sessions.
+    - cron: '35 0,15,16,23 * * *'
+    - cron: '15 0,1,16,17 * * *'
+    - cron: '5 18,19 * * *'
+    - cron: '45 3,4,18,19 * * *'
+    - cron: '25 4,5 * * *'
 permissions:
   contents: write
   pages: write
@@ -34,13 +35,22 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
+      - name: Check Houston post-draw window
+        id: gate
+        env:
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: python scripts/schedule_gate.py
       - name: Install dependencies
+        if: steps.gate.outputs.run == 'true'
         run: pip install -r requirements.txt
       - name: Run unit tests
+        if: steps.gate.outputs.run == 'true'
         run: python -m unittest discover -s tests -v
       - name: Train and generate official data
+        if: steps.gate.outputs.run == 'true'
         run: python scripts/train.py
       - name: Validate generated dataset
+        if: steps.gate.outputs.run == 'true'
         run: |
           python - <<'PY'
           import json
@@ -58,6 +68,7 @@ jobs:
           print('Validated',p,'with four draw sessions')
           PY
       - name: Commit new model output
+        if: steps.gate.outputs.run == 'true'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -70,8 +81,11 @@ jobs:
       # GITHUB_TOKEN commits do not launch another push-triggered workflow.
       # Publish here too, so refreshed predictions reach GitHub Pages.
       - uses: actions/configure-pages@v5
+        if: steps.gate.outputs.run == 'true'
       - uses: actions/upload-pages-artifact@v3
+        if: steps.gate.outputs.run == 'true'
         with:
           path: web
       - id: deployment
+        if: steps.gate.outputs.run == 'true'
         uses: actions/deploy-pages@v4
