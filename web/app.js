@@ -165,7 +165,6 @@ for(const key of ["draw","strategy","count","playType"])$(key).addEventListener(
 for(const key of ["draw","strategy","count","playType"]){const stored=sessionStorage.getItem("pick3-"+key);if(stored&&[...$(key).options].some(o=>o.value===stored))$(key).value=stored;}
 $("strategy").addEventListener("change",()=>{$("modelExplainer").textContent=strategyDescriptions[$("strategy").value];});
 $("modelExplainer").textContent=strategyDescriptions[$("strategy").value];
-$("rerank").addEventListener("click",render);
 $("copy").addEventListener("click",async()=>{
  if(!visible.length)return;
  const text=visible.map(x=>x.n+(x.permutations?" ["+x.permutations.join("/") +"]":"")).join(", ");
