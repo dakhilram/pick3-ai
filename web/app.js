@@ -1,5 +1,7 @@
 "use strict";
 const $ = id => document.getElementById(id);
+const HOUSTON_ZONE = "America/Chicago";
+const houstonTime = value => new Intl.DateTimeFormat("en-US",{timeZone:HOUSTON_ZONE,month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"}).format(new Date(value));
 let dataset = null, visible = [], liveHistory = null;
 const strategyDescriptions={model:"Recommended: automatically selects the model that did best on earlier historical validation; not a guarantee.",random_forest:"Random Forest: multiple decision trees learn historical digit features.",gradient_boosting:"Gradient Boosting: sequential trees model past features.",ensemble:"Combined models: averages Random Forest, boosted trees and frequency baseline.",smoothed_frequency:"Historical frequency: digit counts with smoothing.",hot:"Hot digits: ranks digits that occurred more often in the last 40 draws.",cold:"Cold digits: ranks digits that occurred less often; they are not overdue.",uniform:"Fair baseline: all 1,000 exact orders have equal scores."};
 const OPTIONS = new Set(["model","random_forest","gradient_boosting","ensemble","smoothed_frequency","hot","cold","uniform"]);
@@ -144,7 +146,7 @@ function render(){
     $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"||play==="combo"?"Unique Any Order / Combo group":"Exact Order"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`:"This play-type backtest is not published yet. Await the next model refresh.";
   }
   $("alert").className="alert ok";
-  $("alert").textContent=`Showing ${name} research through ${g.last_draw}. Dataset generated ${new Date(dataset.generated_at).toLocaleString()}. ${strategy==="model"?"Automatic validation-selected models.":"Exploratory ranking: "+$("strategy").selectedOptions[0].textContent+"."} Historical patterns are not verified winning odds.`;
+  $("alert").textContent=`Showing ${name} research through ${g.last_draw}. Dataset generated ${houstonTime(dataset.generated_at)}. ${strategy==="model"?"Automatic validation-selected models.":"Exploratory ranking: "+$("strategy").selectedOptions[0].textContent+"."} Historical patterns are not verified winning odds.`;
  }catch(e){visible=[];$("alert").className="alert error";$("alert").textContent=e.message;}
 }
 async function boot(announce=false){
@@ -158,7 +160,7 @@ async function boot(announce=false){
   document.querySelector(".status").classList.add("ok");
   render();
   await loadLive();
-  if(announce&&previous==dataset.generated_at){$("alert").textContent="No new official dataset published since "+new Date(dataset.generated_at).toLocaleString()+". Your rankings remain unchanged.";}
+  if(announce&&previous==dataset.generated_at){$("alert").textContent="No new official dataset published since "+houstonTime(dataset.generated_at)+". Your rankings remain unchanged.";}
  }catch(error){
   if(dataset&&announce){$("alert").className="alert error";$("alert").textContent="Could not check for newer data. Your previously loaded rankings remain available.";return;}
   $("dataStatus").textContent="Data unavailable";
