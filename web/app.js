@@ -127,7 +127,13 @@ function render(){
   if(!validProbabilityRows(scores)||![5,10,20,50].includes(n))throw Error("Invalid rankings");
   const play=$("playType").value;
   if(!["straight","box","both","combo"].includes(play))throw Error("Invalid play type");
-  visible=(play==="box"||play==="combo"?boxCombinations(scores):combinations(scores)).slice(0,n);
+  if(play==="both"){
+    const chosen=boxCombinations(scores).slice(0,n);
+    visible=chosen.map(group=>{
+      const exact=combinations(scores).filter(entry=>[...entry.n].sort().join("")===group.n)[0];
+      return {n:exact.n,p:group.p,permutations:group.permutations};
+    });
+  }else visible=(play==="box"||play==="combo"?boxCombinations(scores):combinations(scores)).slice(0,n);
   $("playBadge").textContent=({box:"ANY ORDER",straight:"EXACT ORDER",both:"EXACT / ANY ORDER",combo:"COMBO · ALL EXACT ORDERS"})[play];
   $("playHelp").textContent=({straight:"Only the precise three-digit order matches. Fair-draw odds: 1 in 1,000.",box:"Any Order: all distinct permutations are grouped (1, 3 or 6).",both:"Exact/Any: use the displayed number for both Exact and Any Order on one ticket. A 50¢ base play costs $1 total; FIREBALL is extra.",combo:"Combo covers every distinct exact-order permutation of the selected digits; total ticket cost depends on 1, 3 or 6 ways."})[play]+" These are exploratory model scores, not certified odds.";
   // Present scores as relative rankings, not certified odds.
@@ -144,9 +150,9 @@ function render(){
   $("lastDate").textContent=g.last_draw;
   $("holdout").textContent=g.holdout_draws.toLocaleString();
   const mlSelected=(g.selected_models||g.validation.map(m=>m.selected)).filter(m=>m!=="smoothed_frequency").length;
-  $("confidenceTitle").textContent=mlSelected?"Models selected for "+mlSelected+" of 3 digit positions":"Historical frequency baseline selected";
+  $("confidenceTitle").textContent=g.exact_any_selection?"Selected for this session: "+g.exact_any_selection.model.replaceAll("_"," "):(mlSelected?"Models selected for "+mlSelected+" of 3 digit positions":"Historical frequency baseline selected");
   $("confidenceDetail").textContent="This is validation-based model selection, not a reliable winning-confidence percentage. The same 3 digits can be used for Exact, Any or Exact/Any; matching rules and ticket costs differ. FIREBALL is optional and not scored.";
-  $("confidenceBacktest").textContent=g.backtest?.straight?.coverage?.top_5!=null?percent(g.backtest.straight.coverage.top_5):"—";
+  $("confidenceBacktest").textContent=g.backtest?.box?.coverage?.top_5!=null?percent(g.backtest.box.coverage.top_5):"—";
   const selected=g.selected_models||g.validation.map(m=>m.selected);
   $("performance").textContent=selected.filter(m=>m!=="smoothed_frequency").length+" / 3";
   const freq=frequencies(g.recent),max=Math.max(1,...freq);
@@ -165,9 +171,9 @@ function render(){
    el.append(label,result);return el;
   }));
   const b=g.backtest;
-  const report=(play==="box"||play==="combo")?b?.box:b?.straight;
+  const report=(play==="box"||play==="combo"||play==="both")?b?.box:b?.straight;
   if(play==="both"&&b?.straight&&b?.box){
-    $("backtest").textContent=`Exact/Any on unseen ${b.draws} draws: Exact top 10 ${(100*b.straight.coverage.top_10).toFixed(2)}% (fair 1%); Any-order reference top 10 groups ${(100*b.box.coverage.top_10).toFixed(2)}% (fair ${(100*b.box.fair_expected_coverage.top_10).toFixed(2)}%). These are separate rankings, not a combined ticket-level backtest.`;
+    $("backtest").textContent=`Exact/Any on unseen ${b.draws} draws: Exact top 10 ${(100*b.straight.coverage.top_10).toFixed(2)}% (fair 1%); Any-order reference top 10 groups ${(100*b.box.coverage.top_10).toFixed(2)}% (fair ${(100*b.box.fair_expected_coverage.top_10).toFixed(2)}%). Any-order groups correspond to the displayed Exact/Any play; the test does not account for payouts.`;
   } else {
     $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"||play==="combo"?"Unique Any Order / Combo group":"Exact Order"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`:"This play-type backtest is not published yet. Await the next model refresh.";
   }
