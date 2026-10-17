@@ -1,6 +1,6 @@
 {
-  "schema_version": 3,
-  "generated_at": "2026-10-17T00:22:54.159430+00:00",
+  "schema_version": 4,
+  "generated_at": "2026-10-17T00:26:58.966552+00:00",
   "source": "https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/",
   "games": {
     "morning": {
@@ -302,6 +302,35 @@
           "top_5": 0.00333,
           "top_10": 0.01,
           "top_20": 0.01667
+        },
+        "straight": {
+          "coverage": {
+            "top_1": 0.0,
+            "top_5": 0.00333,
+            "top_10": 0.01,
+            "top_20": 0.01667
+          },
+          "fair_expected_coverage": {
+            "top_1": 0.001,
+            "top_5": 0.005,
+            "top_10": 0.01,
+            "top_20": 0.02
+          }
+        },
+        "box": {
+          "coverage": {
+            "top_1": 0.01,
+            "top_5": 0.05,
+            "top_10": 0.08667,
+            "top_20": 0.16
+          },
+          "fair_expected_coverage": {
+            "top_1": 0.006,
+            "top_5": 0.03,
+            "top_10": 0.06,
+            "top_20": 0.12
+          },
+          "groups": 220
         },
         "uniform_expected_top_10": 0.01,
         "mean_position_log_loss": 2.30186,
@@ -609,6 +638,35 @@
           "top_10": 0.01333,
           "top_20": 0.04333
         },
+        "straight": {
+          "coverage": {
+            "top_1": 0.0,
+            "top_5": 0.01,
+            "top_10": 0.01333,
+            "top_20": 0.04333
+          },
+          "fair_expected_coverage": {
+            "top_1": 0.001,
+            "top_5": 0.005,
+            "top_10": 0.01,
+            "top_20": 0.02
+          }
+        },
+        "box": {
+          "coverage": {
+            "top_1": 0.00333,
+            "top_5": 0.03,
+            "top_10": 0.06,
+            "top_20": 0.11333
+          },
+          "fair_expected_coverage": {
+            "top_1": 0.006,
+            "top_5": 0.03,
+            "top_10": 0.06,
+            "top_20": 0.12
+          },
+          "groups": 220
+        },
         "uniform_expected_top_10": 0.01,
         "mean_position_log_loss": 2.30345,
         "uniform_position_log_loss": 2.30259
@@ -915,6 +973,35 @@
           "top_10": 0.01,
           "top_20": 0.01667
         },
+        "straight": {
+          "coverage": {
+            "top_1": 0.00333,
+            "top_5": 0.00667,
+            "top_10": 0.01,
+            "top_20": 0.01667
+          },
+          "fair_expected_coverage": {
+            "top_1": 0.001,
+            "top_5": 0.005,
+            "top_10": 0.01,
+            "top_20": 0.02
+          }
+        },
+        "box": {
+          "coverage": {
+            "top_1": 0.00333,
+            "top_5": 0.02667,
+            "top_10": 0.05667,
+            "top_20": 0.11
+          },
+          "fair_expected_coverage": {
+            "top_1": 0.006,
+            "top_5": 0.03,
+            "top_10": 0.06,
+            "top_20": 0.12
+          },
+          "groups": 220
+        },
         "uniform_expected_top_10": 0.01,
         "mean_position_log_loss": 2.30463,
         "uniform_position_log_loss": 2.30259
@@ -1220,6 +1307,35 @@
           "top_5": 0.00333,
           "top_10": 0.00667,
           "top_20": 0.02
+        },
+        "straight": {
+          "coverage": {
+            "top_1": 0.0,
+            "top_5": 0.00333,
+            "top_10": 0.00667,
+            "top_20": 0.02
+          },
+          "fair_expected_coverage": {
+            "top_1": 0.001,
+            "top_5": 0.005,
+            "top_10": 0.01,
+            "top_20": 0.02
+          }
+        },
+        "box": {
+          "coverage": {
+            "top_1": 0.0,
+            "top_5": 0.02667,
+            "top_10": 0.05667,
+            "top_20": 0.10333
+          },
+          "fair_expected_coverage": {
+            "top_1": 0.006,
+            "top_5": 0.03,
+            "top_10": 0.06,
+            "top_20": 0.12
+          },
+          "groups": 220
         },
         "uniform_expected_top_10": 0.01,
         "mean_position_log_loss": 2.30429,
