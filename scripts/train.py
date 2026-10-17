@@ -372,7 +372,7 @@ def main():
         else:
             print('No new official draws during lightweight refresh')
         return
-    if previous and previous.get('schema_version') == 7:
+    if previous and previous.get('schema_version') == 8:
         try:
             # Only skip repeated FULL training within the same Houston calendar day.
             training_day = datetime.fromisoformat(previous['generated_at']).astimezone(ZoneInfo('America/Chicago')).date()
