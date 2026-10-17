@@ -1,6 +1,7 @@
 "use strict";
 const $ = id => document.getElementById(id);
 let dataset = null, visible = [];
+const strategyDescriptions={model:"Recommended: automatically selects the model that did best on earlier historical validation; not a guarantee.",random_forest:"Random Forest: multiple decision trees learn historical digit features.",gradient_boosting:"Gradient Boosting: sequential trees model past features.",ensemble:"Combined models: averages Random Forest, boosted trees and frequency baseline.",smoothed_frequency:"Historical frequency: digit counts with smoothing.",hot:"Hot digits: ranks digits that occurred more often in the last 40 draws.",cold:"Cold digits: ranks digits that occurred less often; they are not overdue.",uniform:"Fair baseline: all 1,000 exact orders have equal scores."};
 const OPTIONS = new Set(["model","random_forest","gradient_boosting","ensemble","smoothed_frequency","hot","cold","uniform"]);
 const digits = Array.from({length:10},(_,i)=>i);
 function validProbabilityRows(probs){
@@ -55,16 +56,16 @@ function render(){
   const scores=getScores(g,strategy),n=Number($("count").value);
   if(!validProbabilityRows(scores)||![5,10,20,50].includes(n))throw Error("Invalid rankings");
   const play=$("playType").value;
-  if(!["straight","box"].includes(play))throw Error("Invalid play type");
-  visible=(play==="box"?boxCombinations(scores):combinations(scores)).slice(0,n);
-  $("playBadge").textContent=play==="box"?"BOX · ANY ORDER":"STRAIGHT · EXACT ORDER";
-  $("playHelp").textContent=play==="box"?"Box groups sum scores for all distinct orders of the same digits. 1, 3, or 6 orders per group; these scores are not verified winning odds.":"Straight ranks individual 000–999 outcomes; each exact result has a fair-draw chance of 0.1%.";
+  if(!["straight","box","both","combo"].includes(play))throw Error("Invalid play type");
+  visible=(play==="box"||play==="combo"?boxCombinations(scores):combinations(scores)).slice(0,n);
+  $("playBadge").textContent=({box:"ANY ORDER",straight:"EXACT ORDER",both:"EXACT / ANY ORDER",combo:"COMBO · ALL EXACT ORDERS"})[play];
+  $("playHelp").textContent=({straight:"Only the precise three-digit order matches. Fair-draw odds: 1 in 1,000.",box:"Any Order: all distinct permutations are grouped (1, 3 or 6).",both:"Exact/Any: use the displayed number for both Exact and Any Order on one ticket. A 50¢ base play costs $1 total; FIREBALL is extra.",combo:"Combo covers every distinct exact-order permutation of the selected digits; total ticket cost depends on 1, 3 or 6 ways."})[play]+" These are exploratory model scores, not certified odds.";
   // Present scores as relative rankings, not certified odds.
   $("numbers").replaceChildren(...visible.map((entry,i)=>{
    const el=document.createElement("div");el.className="number";
    const rank=document.createElement("span");rank.className="rank";rank.textContent="#"+String(i+1).padStart(2,"0");
    const number=document.createElement("strong");number.textContent=entry.n;
-   const score=document.createElement("small");score.textContent=(entry.p*100).toFixed(3)+"% score"+(play==="box"?" · "+entry.permutations.length+" ways":"");
+   const score=document.createElement("small");score.textContent=(entry.p*100).toFixed(3)+"% score"+((play==="box"||play==="combo")?" · "+entry.permutations.length+" ways":"");
    el.append(rank,number,score);return el;
   }));
   $("total").textContent=g.draws.toLocaleString();
@@ -89,28 +90,35 @@ function render(){
    el.append(label,result);return el;
   }));
   const b=g.backtest;
-  const report=play==="box"?b?.box:b?.straight;
-  $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"?"Unique Box":"Straight"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`: "This play-type backtest is not published yet. Await the next model refresh.";
+  const report=(play==="box"||play==="combo")?b?.box:b?.straight;
+  $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"||play==="combo"?"Unique Any Order / Combo group":"Exact Order"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`: "This play-type backtest is not published yet. Await the next model refresh.";
   $("alert").className="alert ok";
   $("alert").textContent=`Showing ${name} research through ${g.last_draw}. Dataset generated ${new Date(dataset.generated_at).toLocaleString()}. ${strategy==="model"?"Automatic validation-selected models.":"Exploratory ranking: "+$("strategy").selectedOptions[0].textContent+"."} Historical patterns are not verified winning odds.`;
  }catch(e){visible=[];$("alert").className="alert error";$("alert").textContent=e.message;}
 }
-async function boot(){
+async function boot(announce=false){
  try{
   const response=await fetch("data/predictions.json",{cache:"no-store"});
   if(!response.ok)throw Error("Results are not published yet (HTTP "+response.status+").");
-  dataset=validate(await response.json());
+  const incoming=validate(await response.json());
+  const previous=dataset?.generated_at;
+  dataset=incoming;
   $("dataStatus").textContent="Official archives connected";
   document.querySelector(".status").classList.add("ok");
   render();
+  if(announce&&previous==dataset.generated_at){$("alert").textContent="No new official dataset published since "+new Date(dataset.generated_at).toLocaleString()+". Your rankings remain unchanged.";}
  }catch(error){
+  if(dataset&&announce){$("alert").className="alert error";$("alert").textContent="Could not check for newer data. Your previously loaded rankings remain available.";return;}
   $("dataStatus").textContent="Data unavailable";
   document.querySelector(".status").classList.add("error");
   $("alert").className="alert error";
   $("alert").textContent=error.message+" Check the latest training run on GitHub Actions.";
  }
 }
-for(const key of ["draw","strategy","count","playType"])$(key).addEventListener("change",render);
+for(const key of ["draw","strategy","count","playType"])$(key).addEventListener("change",()=>{sessionStorage.setItem("pick3-"+key,$(key).value);render();});
+for(const key of ["draw","strategy","count","playType"]){const stored=sessionStorage.getItem("pick3-"+key);if(stored&&[...$(key).options].some(o=>o.value===stored))$(key).value=stored;}
+$("strategy").addEventListener("change",()=>{$("modelExplainer").textContent=strategyDescriptions[$("strategy").value];});
+$("modelExplainer").textContent=strategyDescriptions[$("strategy").value];
 $("rerank").addEventListener("click",render);
 $("copy").addEventListener("click",async()=>{
  if(!visible.length)return;
@@ -119,4 +127,5 @@ $("copy").addEventListener("click",async()=>{
  catch{window.prompt("Copy these combinations:",text);}
  setTimeout(()=>$("copy").textContent="Copy displayed combinations",1600);
 });
+$("refreshData").addEventListener("click",async()=>{const btn=$("refreshData");btn.disabled=true;btn.textContent="Checking…";try{await boot(true);}finally{btn.disabled=false;btn.textContent="↻ Check latest results";}});
 boot();
