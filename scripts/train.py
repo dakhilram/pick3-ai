@@ -5,6 +5,7 @@ Research-only model scores are not calibrated lottery winning probabilities.
 import csv
 import io
 import json
+import os
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
@@ -322,6 +323,26 @@ def main():
         source_rows[game] = rows
         print('Official', game, len(rows), rows[-1][0].date(), flush=True)
 
+    training_mode = os.environ.get('PICK3_TRAIN_MODE', 'train')
+    if training_mode == 'refresh' and previous and previous.get('schema_version') == 7:
+        payload = json.loads(json.dumps(previous))
+        changed = False
+        for game, rows in source_rows.items():
+            latest = rows[-1][0].date().isoformat()
+            recent = [''.join(map(str, digits)) for _, digits in rows[-40:][::-1]]
+            if payload['games'][game]['last_draw'] != latest or payload['games'][game]['recent'] != recent:
+                changed = True
+                payload['games'][game].update(last_draw=latest, recent=recent, draws=len(rows))
+        if changed:
+            history_path = target.parent / 'live_history.json'
+            history = json.loads(history_path.read_text()) if history_path.exists() else None
+            save_atomic(history_path, reconcile(previous, payload, history))
+            payload['official_checked_at'] = datetime.now(timezone.utc).isoformat()
+            save_atomic(target, payload)
+            print('New official results recorded; model held until daily training')
+        else:
+            print('No new official draws during lightweight refresh')
+        return
     if previous and previous.get('schema_version') == 7:
         try:
             if all(previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
