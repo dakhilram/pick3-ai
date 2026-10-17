@@ -1,0 +1,208 @@
+{
+  "created_at": "2026-10-17T22:02:39.983540+00:00",
+  "source": "User's completed laptop tournament; 300 chronological held-out draws/session",
+  "play": "Five $1 Exact/Any tickets; no Fireball",
+  "candidates": [
+    "frequency",
+    "short_frequency",
+    "random_forest",
+    "gradient_boosting",
+    "ensemble",
+    "xgboost",
+    "lightgbm"
+  ],
+  "sessions": {
+    "morning": {
+      "selected_on_validation": "frequency",
+      "draws_tested": 300,
+      "models": {
+        "frequency": {
+          "any_matches": 14,
+          "exact_matches": 1,
+          "validation_loss": 5.31468,
+          "test_loss": 5.29149
+        },
+        "short_frequency": {
+          "any_matches": 6,
+          "exact_matches": 0,
+          "validation_loss": 5.32824,
+          "test_loss": 5.31663
+        },
+        "random_forest": {
+          "any_matches": 11,
+          "exact_matches": 2,
+          "validation_loss": 5.3237,
+          "test_loss": 5.29327
+        },
+        "gradient_boosting": {
+          "any_matches": 5,
+          "exact_matches": 3,
+          "validation_loss": 5.35101,
+          "test_loss": 5.35662
+        },
+        "ensemble": {
+          "any_matches": 8,
+          "exact_matches": 3,
+          "validation_loss": 5.31937,
+          "test_loss": 5.30376
+        },
+        "xgboost": {
+          "any_matches": 12,
+          "exact_matches": 1,
+          "validation_loss": 5.35434,
+          "test_loss": 5.35346
+        },
+        "lightgbm": {
+          "any_matches": 7,
+          "exact_matches": 1,
+          "validation_loss": 5.50539,
+          "test_loss": 5.48262
+        }
+      }
+    },
+    "day": {
+      "selected_on_validation": "frequency",
+      "draws_tested": 300,
+      "models": {
+        "frequency": {
+          "any_matches": 8,
+          "exact_matches": 3,
+          "validation_loss": 5.33168,
+          "test_loss": 5.32693
+        },
+        "short_frequency": {
+          "any_matches": 9,
+          "exact_matches": 1,
+          "validation_loss": 5.36504,
+          "test_loss": 5.34755
+        },
+        "random_forest": {
+          "any_matches": 9,
+          "exact_matches": 2,
+          "validation_loss": 5.32887,
+          "test_loss": 5.346
+        },
+        "gradient_boosting": {
+          "any_matches": 3,
+          "exact_matches": 0,
+          "validation_loss": 5.37581,
+          "test_loss": 5.34473
+        },
+        "ensemble": {
+          "any_matches": 3,
+          "exact_matches": 0,
+          "validation_loss": 5.33513,
+          "test_loss": 5.33016
+        },
+        "xgboost": {
+          "any_matches": 7,
+          "exact_matches": 0,
+          "validation_loss": 5.3957,
+          "test_loss": 5.35956
+        },
+        "lightgbm": {
+          "any_matches": 8,
+          "exact_matches": 0,
+          "validation_loss": 5.55943,
+          "test_loss": 5.50265
+        }
+      }
+    },
+    "evening": {
+      "selected_on_validation": "frequency",
+      "draws_tested": 300,
+      "models": {
+        "frequency": {
+          "any_matches": 7,
+          "exact_matches": 1,
+          "validation_loss": 5.31495,
+          "test_loss": 5.31555
+        },
+        "short_frequency": {
+          "any_matches": 6,
+          "exact_matches": 0,
+          "validation_loss": 5.33635,
+          "test_loss": 5.37219
+        },
+        "random_forest": {
+          "any_matches": 7,
+          "exact_matches": 1,
+          "validation_loss": 5.33743,
+          "test_loss": 5.3221
+        },
+        "gradient_boosting": {
+          "any_matches": 17,
+          "exact_matches": 3,
+          "validation_loss": 5.38353,
+          "test_loss": 5.34832
+        },
+        "ensemble": {
+          "any_matches": 15,
+          "exact_matches": 2,
+          "validation_loss": 5.33521,
+          "test_loss": 5.31924
+        },
+        "xgboost": {
+          "any_matches": 11,
+          "exact_matches": 1,
+          "validation_loss": 5.41834,
+          "test_loss": 5.35075
+        },
+        "lightgbm": {
+          "any_matches": 8,
+          "exact_matches": 2,
+          "validation_loss": 5.58352,
+          "test_loss": 5.50608
+        }
+      }
+    },
+    "night": {
+      "selected_on_validation": "frequency",
+      "draws_tested": 300,
+      "models": {
+        "frequency": {
+          "any_matches": 7,
+          "exact_matches": 1,
+          "validation_loss": 5.30682,
+          "test_loss": 5.29263
+        },
+        "short_frequency": {
+          "any_matches": 6,
+          "exact_matches": 0,
+          "validation_loss": 5.32184,
+          "test_loss": 5.3869
+        },
+        "random_forest": {
+          "any_matches": 11,
+          "exact_matches": 0,
+          "validation_loss": 5.30688,
+          "test_loss": 5.29644
+        },
+        "gradient_boosting": {
+          "any_matches": 3,
+          "exact_matches": 0,
+          "validation_loss": 5.32665,
+          "test_loss": 5.35186
+        },
+        "ensemble": {
+          "any_matches": 7,
+          "exact_matches": 0,
+          "validation_loss": 5.30254,
+          "test_loss": 5.30477
+        },
+        "xgboost": {
+          "any_matches": 10,
+          "exact_matches": 1,
+          "validation_loss": 5.33928,
+          "test_loss": 5.35535
+        },
+        "lightgbm": {
+          "any_matches": 9,
+          "exact_matches": 0,
+          "validation_loss": 5.46927,
+          "test_loss": 5.48081
+        }
+      }
+    }
+  }
+}
