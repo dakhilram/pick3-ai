@@ -247,19 +247,6 @@ def predict_one(rows):
 
 
 def main():
-    payload = {'schema_version': 5, 'generated_at': datetime.now(timezone.utc).isoformat(),
-               'source': BASE, 'games': {}}
-    for game in GAMES:
-        url = BASE + f'pick3{game}.csv'
-        req = urllib.request.Request(url, headers={'User-Agent': 'PICK3-AI/2.0'})
-        with urllib.request.urlopen(req, timeout=40) as response:
-            data = response.read().decode('utf-8-sig')
-        rows = parse(data, game)
-        if not rows:
-            raise ValueError(f'No usable official records: {game}')
-        payload['games'][game] = predict_one(rows)
-        payload['games'][game]['source_url'] = url
-        print(game, len(rows), rows[-1][0].date(), flush=True)
     target = ROOT / 'web' / 'data' / 'predictions.json'
     target.parent.mkdir(parents=True, exist_ok=True)
     previous = None
@@ -268,17 +255,38 @@ def main():
             previous = json.loads(target.read_text(encoding='utf-8'))
         except (ValueError, OSError):
             previous = None
-    if previous is not None:
+
+    # Check official data freshness BEFORE expensive feature extraction or model training.
+    source_rows = {}
+    for game in GAMES:
+        url = BASE + f'pick3{game}.csv'
+        req = urllib.request.Request(url, headers={'User-Agent': 'PICK3-AI/2.0'})
+        with urllib.request.urlopen(req, timeout=40) as response:
+            rows = parse(response.read().decode('utf-8-sig'), game)
+        if not rows:
+            raise ValueError(f'No usable official records: {game}')
+        source_rows[game] = rows
+        print('Official', game, len(rows), rows[-1][0].date(), flush=True)
+
+    if previous and previous.get('schema_version') == 5:
         try:
-            if previous.get('schema_version') == 5 and all(
-                previous['games'][g]['last_draw'] == payload['games'][g]['last_draw'] and
-                previous['games'][g]['recent'] == payload['games'][g]['recent']
-                for g in GAMES
-            ):
-                print('Official draw history unchanged; keeping previous predictions')
+            if all(previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
+                   and previous['games'][g]['recent'] == [
+                       ''.join(map(str, digits)) for _, digits in source_rows[g][-40:][::-1]
+                   ] for g in GAMES):
+                print('No newly published official results. Skipping retraining.')
                 return
-        except (KeyError, ValueError, TypeError):
+        except (KeyError, TypeError, ValueError):
             pass
+
+    payload = {'schema_version': 5, 'generated_at': datetime.now(timezone.utc).isoformat(),
+               'source': BASE, 'games': {}}
+    for game in GAMES:
+        obj = predict_one(source_rows[game])
+        obj['source_url'] = BASE + f'pick3{game}.csv'
+        payload['games'][game] = obj
+        print('Trained', game, obj['last_draw'], flush=True)
+
     live_path = target.parent / 'live_history.json'
     try:
         history = json.loads(live_path.read_text(encoding='utf-8')) if live_path.exists() else None
