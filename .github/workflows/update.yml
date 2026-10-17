@@ -46,8 +46,10 @@ jobs:
       - name: Run unit tests
         if: steps.gate.outputs.run == 'true'
         run: python -m unittest discover -s tests -v
-      - name: Train and generate official data
+      - name: Check official draws or train daily models
         if: steps.gate.outputs.run == 'true'
+        env:
+          PICK3_TRAIN_MODE: ${{ steps.gate.outputs.train == 'true' && 'train' || 'refresh' }}
         run: python scripts/train.py
       - name: Validate generated dataset
         if: steps.gate.outputs.run == 'true'
