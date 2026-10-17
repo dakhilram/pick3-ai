@@ -60,7 +60,8 @@ jobs:
           git add -f web/data/predictions.json
           if ! git diff --cached --quiet; then
             git commit -m 'Update official Texas Pick 3 model outputs'
-            git push
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
       # GITHUB_TOKEN commits do not launch another push-triggered workflow.
       # Publish here too, so refreshed predictions reach GitHub Pages.
