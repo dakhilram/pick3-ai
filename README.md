@@ -8,6 +8,16 @@ The four CSV files come from [Texas Lottery's official downloads](https://www.te
 
 **Important:** Fair Pick 3 draws are independent and each exact-order combination has theoretical probability 1/1000. Historical regularities do not imply future predictability. Displayed model scores are *not calibrated winning probabilities*, and none of the proposed strategies has demonstrated an advantage. No wagering or payment functionality is included.
 
+
+## v2 model architecture and accountability
+
+- Uses **Random Forest**, scikit-learn **Histogram Gradient Boosting**, a Laplace-smoothed frequency baseline, and a simple three-way probability ensemble. No transfer learning or pretrained foundation model is used.
+- Uses the preceding **60 draws** for position-wise digit frequencies, lagged digits, sums, parity, repeats, and digit-pair features.
+- Reserves an earlier chronological validation block for model selection and a **separate final chronological test block** (up to 300 draws) for performance reporting. Selection requires at least 0.005 reduction in average digit log loss over baseline; otherwise baseline is used. Test metrics are not used to pick models.
+- Reports test digit log loss and top-1/top-5/top-10/top-20 exact-order coverage, compared to fair-draw expectations. This is a *single terminal holdout*, not a continuously updated live performance guarantee. The training history is capped to the latest 2,600 supervised examples to bound GitHub Actions compute.
+- GitHub Actions checks the four official archives **four times per Texas drawing day** and only writes new predictions when the source draw history changes. GitHub can delay jobs, and the draw archive itself may lag.
+- Neither AI architecture nor pattern mining can reliably predict a fair lottery; model scores are exploratory and are **not calibrated probabilities of winning**.
+
 ## Run locally
 
 ```bash
