@@ -1,6 +1,6 @@
 "use strict";
 const $ = id => document.getElementById(id);
-let dataset = null, visible = [];
+let dataset = null, visible = [], liveHistory = null;
 const strategyDescriptions={model:"Recommended: automatically selects the model that did best on earlier historical validation; not a guarantee.",random_forest:"Random Forest: multiple decision trees learn historical digit features.",gradient_boosting:"Gradient Boosting: sequential trees model past features.",ensemble:"Combined models: averages Random Forest, boosted trees and frequency baseline.",smoothed_frequency:"Historical frequency: digit counts with smoothing.",hot:"Hot digits: ranks digits that occurred more often in the last 40 draws.",cold:"Cold digits: ranks digits that occurred less often; they are not overdue.",uniform:"Fair baseline: all 1,000 exact orders have equal scores."};
 const OPTIONS = new Set(["model","random_forest","gradient_boosting","ensemble","smoothed_frequency","hot","cold","uniform"]);
 const digits = Array.from({length:10},(_,i)=>i);
@@ -48,6 +48,46 @@ function boxCombinations(probs){
  return [...groups.values()].sort((a,b)=>b.p-a.p||a.n.localeCompare(b.n));
 }
 
+
+function percent(n){return (100*n).toFixed(2)+"%";}
+function renderLive(){
+ const session=$("draw").value;
+ const rows=liveHistory?.games?.[session]||[];
+ $("liveStatus").textContent=rows.length?"LIVE OUTCOMES VERIFIED":"AWAITING NEXT DRAW";
+ $("liveCount").textContent=String(rows.length);
+ const metrics=[
+  ["exact_hit","exact_fair_probability","liveExact","liveExactBaseline"],
+  ["exact_any_hit","exact_any_fair_probability","liveAny","liveAnyBaseline"],
+  ["box_hit","box_fair_probability","liveBox","liveBoxBaseline"]
+ ];
+ for(const [key,base,el,baseline] of metrics){
+  const actual=rows.filter(row=>row[key]===true).length;
+  const fair=rows.length?rows.reduce((sum,row)=>sum+Number(row[base]||0),0)/rows.length:0;
+  $(el).textContent=rows.length?percent(actual/rows.length):"—";
+  $(baseline).textContent=rows.length?`${actual} of ${rows.length} matches · fair expectation ${percent(fair)}`:"Waiting for live results";
+ }
+ $("liveDetails").textContent=rows.length
+  ? "Live records use the recommended model's previous top five, saved before the next draw. Other model selectors do not change this scorecard. Small samples fluctuate substantially."
+  : "No eligible completed live prediction has been scored yet. The first verified outcome will appear after the next official draw is processed.";
+ $("liveRows").replaceChildren(...rows.slice(-12).reverse().map(item=>{
+  const row=document.createElement("div");row.className="live-row";
+  const date=document.createElement("span");date.textContent=item.draw_date+" · "+item.actual;
+  const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.exact_any_hit?"ANY HIT":item.box_hit?"BOX HIT":"NO MATCH";
+  result.className=item.exact_hit||item.exact_any_hit||item.box_hit?"match":"miss";
+  row.append(date,result);return row;
+ }));
+}
+async function loadLive(){
+ try{
+  const response=await fetch("data/live_history.json",{cache:"no-store"});
+  if(!response.ok)throw Error("no live records yet");
+  const next=await response.json();
+  if(!next||typeof next.games!=="object")throw Error("invalid live data");
+  liveHistory=next;
+ }catch(error){if(!liveHistory)liveHistory={games:{}};}
+ renderLive();
+}
+
 function render(){
  if(!dataset)return;
  const name=$("draw").value, strategy=$("strategy").value;
@@ -69,6 +109,7 @@ function render(){
    el.append(rank,number,score);return el;
   }));
   $("total").textContent=g.draws.toLocaleString();
+  renderLive();
   $("last").textContent=g.recent[0];
   $("lastDate").textContent=g.last_draw;
   $("holdout").textContent=g.holdout_draws.toLocaleString();
@@ -110,6 +151,7 @@ async function boot(announce=false){
   $("dataStatus").textContent="Official archives connected";
   document.querySelector(".status").classList.add("ok");
   render();
+  await loadLive();
   if(announce&&previous==dataset.generated_at){$("alert").textContent="No new official dataset published since "+new Date(dataset.generated_at).toLocaleString()+". Your rankings remain unchanged.";}
  }catch(error){
   if(dataset&&announce){$("alert").className="alert error";$("alert").textContent="Could not check for newer data. Your previously loaded rankings remain available.";return;}
