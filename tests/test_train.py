@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from train import parse, features, build, frequency, normalize, top_hit, make_model
+from train import parse, features, build, frequency, normalize, top_hit, make_model, BOX_GROUPS, box_backtest
 
 
 class Tests(unittest.TestCase):
@@ -38,6 +38,22 @@ class Tests(unittest.TestCase):
         arr = np.tile(np.eye(10)[3], (5, 1))
         truth = np.tile([3, 3, 3], (5, 1))
         self.assertEqual(top_hit([arr] * 3, truth, 1), 1.0)
+
+    def test_box_group_sizes(self):
+        groups={''.join(map(str,d)):idx for d,idx in BOX_GROUPS}
+        self.assertEqual(len(groups), 220)
+        self.assertEqual(groups['123'].tolist(), [123,132,213,231,312,321])
+        self.assertEqual(groups['112'].tolist(), [112,121,211])
+        self.assertEqual(groups['777'].tolist(), [777])
+
+    def test_box_backtest_counts_permutations(self):
+        arr=np.tile(np.eye(10)[1],(5,1))
+        result=box_backtest([arr]*3,np.tile([1,1,1],(5,1)))
+        self.assertEqual(result['coverage']['top_1'],1.0)
+        self.assertAlmostEqual(result['fair_expected_coverage']['top_1'],.001)
+        uniform=np.full((2,10),.1)
+        report=box_backtest([uniform]*3,np.asarray([[0,0,0],[1,1,1]]))
+        self.assertEqual(report['groups'],220)
 
     def test_models_build(self):
         self.assertIsNotNone(make_model('random_forest', 1))
