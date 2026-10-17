@@ -19,7 +19,7 @@ permissions:
   id-token: write
 concurrency:
   group: pick3-data-refresh
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   refresh:
     runs-on: ubuntu-latest
