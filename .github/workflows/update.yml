@@ -21,8 +21,8 @@ permissions:
   pages: write
   id-token: write
 concurrency:
-  group: pick3-data-refresh
-  cancel-in-progress: true
+  group: pages
+  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
