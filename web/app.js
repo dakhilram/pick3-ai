@@ -2,6 +2,31 @@
 const $ = id => document.getElementById(id);
 const HOUSTON_ZONE = "America/Chicago";
 const houstonTime = value => new Intl.DateTimeFormat("en-US",{timeZone:HOUSTON_ZONE,month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit",timeZoneName:"short"}).format(new Date(value));
+const DRAW_TIMES=[["morning",10,0],["day",12,27],["evening",18,0],["night",22,12]];
+function nextHoustonDraw(now=new Date()){
+ const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:HOUSTON_ZONE,year:"numeric",month:"numeric",day:"numeric",hour:"numeric",minute:"numeric",hourCycle:"h23"}).formatToParts(now).filter(p=>p.type!=="literal").map(p=>[p.type,+p.value]));
+ const elapsed=parts.hour*60+parts.minute;
+ for(let offset=0;offset<8;offset++){
+  const day=new Date(Date.UTC(parts.year,parts.month-1,parts.day+offset,12));
+  if(day.getUTCDay()===0)continue;
+  for(const [session,hour,minute] of DRAW_TIMES){
+   if(offset===0 && hour*60+minute<=elapsed)continue;
+   const label=day.toLocaleDateString("en-US",{timeZone:"UTC",weekday:"long",month:"short",day:"numeric"});
+   return {session,label,time:new Date(Date.UTC(2020,0,1,hour,minute)).toLocaleTimeString("en-US",{timeZone:"UTC",hour:"numeric",minute:"2-digit"})};
+  }
+ }
+ throw Error("Next draw unavailable");
+}
+function showNextDraw(){
+ const next=nextHoustonDraw();
+ const names={morning:"Morning",day:"Day",evening:"Evening",night:"Night"};
+ $("nextDraw").textContent="Next scheduled Houston draw: "+names[next.session]+" · "+next.label+" at "+next.time+" Central. Rankings update after new official results are published.";
+ for(const opt of $("draw").options){
+  const label=names[opt.value]+" · "+({"morning":"10:00 AM","day":"12:27 PM","evening":"6:00 PM","night":"10:12 PM"})[opt.value];
+  opt.textContent=(opt.value===next.session?"NEXT · ":"")+label;
+ }
+ return next.session;
+}
 let dataset = null, visible = [], liveHistory = null;
 const strategyDescriptions={model:"Recommended: automatically selects the model that did best on earlier historical validation; not a guarantee.",random_forest:"Random Forest: multiple decision trees learn historical digit features.",gradient_boosting:"Gradient Boosting: sequential trees model past features.",ensemble:"Combined models: averages Random Forest, boosted trees and frequency baseline.",smoothed_frequency:"Historical frequency: digit counts with smoothing.",hot:"Hot digits: ranks digits that occurred more often in the last 40 draws.",cold:"Cold digits: ranks digits that occurred less often; they are not overdue.",uniform:"Fair baseline: all 1,000 exact orders have equal scores."};
 const OPTIONS = new Set(["model","random_forest","gradient_boosting","ensemble","smoothed_frequency","hot","cold","uniform"]);
@@ -55,7 +80,7 @@ function percent(n){return (100*n).toFixed(2)+"%";}
 function renderLive(){
  const session=$("draw").value;
  const rows=liveHistory?.games?.[session]||[];
- $("liveStatus").textContent=rows.length?"LIVE OUTCOMES VERIFIED":"AWAITING NEXT DRAW";
+ $("liveStatus").textContent=rows.length?"COMPLETED OFFICIAL DRAWS":"NO COMPLETED TESTS YET";
  $("liveCount").textContent=String(rows.length);
  $("confidenceLive").textContent=rows.length?percent(rows.filter(r=>r.exact_any_hit).length/rows.length):"—";
  $("confidenceSample").textContent=rows.length?`${rows.length} verified live draws; fair rate depends on selected permutations`:"No verified live outcomes yet";
@@ -78,7 +103,8 @@ function renderLive(){
   const date=document.createElement("span");date.textContent=item.draw_date+" · "+item.actual;
   const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.exact_any_hit?"ANY HIT":item.box_hit?"BOX HIT":"NO MATCH";
   result.className=item.exact_hit||item.exact_any_hit||item.box_hit?"match":"miss";
-  row.append(date,result);return row;
+  const picks=document.createElement("small");picks.textContent=" · Earlier top 5: "+item.exact_picks.join(", ");
+  row.append(date,result,picks);return row;
  }));
 }
 async function loadLive(){
@@ -171,6 +197,7 @@ async function boot(announce=false){
 }
 for(const key of ["draw","strategy","count","playType"])$(key).addEventListener("change",()=>{sessionStorage.setItem("pick3-"+key,$(key).value);render();});
 for(const key of ["draw","strategy","count","playType"]){const stored=sessionStorage.getItem("pick3-"+key);if(stored&&[...$(key).options].some(o=>o.value===stored))$(key).value=stored;}
+if(!sessionStorage.getItem("pick3-draw"))$("draw").value=showNextDraw();else showNextDraw();
 $("strategy").addEventListener("change",()=>{$("modelExplainer").textContent=strategyDescriptions[$("strategy").value];});
 $("modelExplainer").textContent=strategyDescriptions[$("strategy").value];
 $("copy").addEventListener("click",async()=>{
