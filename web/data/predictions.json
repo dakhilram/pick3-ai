@@ -1,6 +1,6 @@
 {
-  "schema_version": 7,
-  "generated_at": "2026-10-17T21:26:35.372259+00:00",
+  "schema_version": 8,
+  "generated_at": "2026-10-17T21:31:44.872127+00:00",
   "source": "https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/",
   "games": {
     "morning": {
@@ -321,6 +321,16 @@
           "top_5": 0.00667,
           "top_10": 0.01,
           "top_20": 0.01667
+        },
+        "exact_any": {
+          "draws": 300,
+          "ticket_count": 5,
+          "exact_hit_rate": 0.01,
+          "any_hit_rate": 0.05,
+          "exact_matches": 3,
+          "any_matches": 15,
+          "fair_exact_rate": 0.005,
+          "fair_any_rate": 0.03
         },
         "straight": {
           "coverage": {
@@ -677,6 +687,16 @@
           "top_10": 0.02,
           "top_20": 0.04
         },
+        "exact_any": {
+          "draws": 300,
+          "ticket_count": 5,
+          "exact_hit_rate": 0.00667,
+          "any_hit_rate": 0.03,
+          "exact_matches": 2,
+          "any_matches": 9,
+          "fair_exact_rate": 0.005,
+          "fair_any_rate": 0.03
+        },
         "straight": {
           "coverage": {
             "top_1": 0.0,
@@ -1032,6 +1052,16 @@
           "top_10": 0.01,
           "top_20": 0.01667
         },
+        "exact_any": {
+          "draws": 300,
+          "ticket_count": 5,
+          "exact_hit_rate": 0.0,
+          "any_hit_rate": 0.02667,
+          "exact_matches": 0,
+          "any_matches": 8,
+          "fair_exact_rate": 0.005,
+          "fair_any_rate": 0.03
+        },
         "straight": {
           "coverage": {
             "top_1": 0.00333,
@@ -1386,6 +1416,16 @@
           "top_5": 0.00333,
           "top_10": 0.00667,
           "top_20": 0.02
+        },
+        "exact_any": {
+          "draws": 300,
+          "ticket_count": 5,
+          "exact_hit_rate": 0.01,
+          "any_hit_rate": 0.02667,
+          "exact_matches": 3,
+          "any_matches": 8,
+          "fair_exact_rate": 0.005,
+          "fair_any_rate": 0.03
         },
         "straight": {
           "coverage": {
