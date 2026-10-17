@@ -1,4 +1,33 @@
 {
   "schema_version": 1,
-  "games": {}
+  "games": {
+    "night": [
+      {
+        "draw_date": "2026-10-16",
+        "published_prediction_at": "2026-10-17T01:36:09.712987+00:00",
+        "last_known_draw": "2026-10-15",
+        "actual": "290",
+        "exact_picks": [
+          "342",
+          "341",
+          "344",
+          "346",
+          "372"
+        ],
+        "box_picks": [
+          "457",
+          "347",
+          "247",
+          "478",
+          "345"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.027,
+        "box_fair_probability": 0.03
+      }
+    ]
+  }
 }
