@@ -247,7 +247,7 @@ def predict_one(rows):
 
 
 def main():
-    payload = {'schema_version': 4, 'generated_at': datetime.now(timezone.utc).isoformat(),
+    payload = {'schema_version': 5, 'generated_at': datetime.now(timezone.utc).isoformat(),
                'source': BASE, 'games': {}}
     for game in GAMES:
         url = BASE + f'pick3{game}.csv'
@@ -270,7 +270,7 @@ def main():
             previous = None
     if previous is not None:
         try:
-            if previous.get('schema_version') == 4 and all(
+            if previous.get('schema_version') == 5 and all(
                 previous['games'][g]['last_draw'] == payload['games'][g]['last_draw'] and
                 previous['games'][g]['recent'] == payload['games'][g]['recent']
                 for g in GAMES
