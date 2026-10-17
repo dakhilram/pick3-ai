@@ -9,6 +9,7 @@ import os
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import numpy as np
 from live_tracker import reconcile, save_atomic
@@ -274,6 +275,10 @@ def predict_one(rows):
     if validation_box_losses['smoothed_frequency'] - validation_box_losses[chosen_kind] < .005:
         chosen_kind = 'smoothed_frequency'
     output = [alternatives[chosen_kind][p] for p in range(3)]
+    for p, metric in enumerate(metrics):
+        metric['selected'] = chosen_kind
+        metric['validation_log_loss'] = metric['candidate_log_loss'][chosen_kind]
+        metric['test_log_loss'] = round(score(test_candidates[chosen_kind][p], y[-test_n:, p]), 5)
     test_predictions = test_candidates[chosen_kind]
     selection = [chosen_kind] * 3
     test_truth = y[-test_n:]
@@ -345,7 +350,10 @@ def main():
         return
     if previous and previous.get('schema_version') == 7:
         try:
-            if all(previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
+            # Only skip repeated FULL training within the same Houston calendar day.
+            training_day = datetime.fromisoformat(previous['generated_at']).astimezone(ZoneInfo('America/Chicago')).date()
+            today = datetime.now(ZoneInfo('America/Chicago')).date()
+            if training_day == today and all(previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
                    and previous['games'][g]['recent'] == [
                        ''.join(map(str, digits)) for _, digits in source_rows[g][-40:][::-1]
                    ] for g in GAMES):
