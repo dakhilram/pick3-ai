@@ -119,7 +119,8 @@ def top_hit(prob_by_position, truth, k):
     combined = (prob_by_position[0][:, universe[:, 0]] *
                 prob_by_position[1][:, universe[:, 1]] *
                 prob_by_position[2][:, universe[:, 2]])
-    idx = np.argpartition(combined, -k, axis=1)[:, -k:]
+    # Stable full ranking, matching the dashboard's digit-order tie break.
+    idx = np.argsort(-combined, axis=1, kind='stable')[:, :k]
     actual = truth[:, 0] * 100 + truth[:, 1] * 10 + truth[:, 2]
     return float(np.mean(np.any(idx == actual[:, None], axis=1)))
 
@@ -160,9 +161,9 @@ def box_backtest(prob_by_position, truth, ks=(1, 5, 10, 20)):
 def predict_one(rows):
     if len(rows) < 700:
         raise ValueError('Insufficient historical draws')
-    X, y = build(rows)
-    # Bound training cost and keep chronology; no future rows in earlier features.
-    X, y = X[-MAX_TRAIN:], y[-MAX_TRAIN:]
+    # Build only the latest bounded training window plus its preceding feature history.
+    # This preserves exactly the same X/y while avoiding thousands of discarded rows.
+    X, y = build(rows[-(MAX_TRAIN + WINDOW):])
     n = len(X)
     test_n = min(300, max(100, n // 6))
     val_n = min(300, max(100, n // 6))
