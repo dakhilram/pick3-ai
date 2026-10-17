@@ -135,31 +135,31 @@ def predict_one(rows):
     train_end = n - test_n - val_n
     if train_end < 250:
         raise ValueError('Insufficient chronological training data')
-    # Two expanding-window validation folds; final test segment is untouched.
-    folds = [(max(250, train_end - val_n), train_end - val_n, train_end),
-             (train_end, train_end, n - test_n)]
-    # First fold uses a preceding validation block and second is the actual
-    # selection block. Avoid overlap with the final test segment.
-    folds = [(max(250, train_end - val_n), train_end - val_n, train_end)]
+    # Two expanding-window validation folds before an untouched final test.
+    folds = [(train_end - 2 * val_n, train_end - val_n),
+             (train_end - val_n, train_end)]
+    if folds[0][0] < 250:
+        raise ValueError('Not enough history for walk-forward folds')
     kinds = ('smoothed_frequency', 'random_forest', 'gradient_boosting', 'ensemble')
     metrics = []
     output = []
     test_predictions = []
     selection = []
     for p in range(3):
-        start, valid_start, valid_end = folds[0]
-        truth = y[valid_start:valid_end, p]
-        base = np.tile(frequency(y[:start, p]), (len(truth), 1))
-        fold_probs = {'smoothed_frequency': base}
-        models = {}
-        for kind in ('random_forest', 'gradient_boosting'):
-            m = make_model(kind, 700 + p)
-            m.fit(X[:start], y[:start, p])
-            fold_probs[kind] = full_prob(m, X[valid_start:valid_end])
-            models[kind] = m
-        fold_probs['ensemble'] = normalize((base + fold_probs['random_forest'] +
-                                            fold_probs['gradient_boosting']) / 3)
-        validation_losses = {kind: score(arr, truth) for kind, arr in fold_probs.items()}
+        losses = {kind: [] for kind in kinds}
+        for fold_idx, (valid_start, valid_end) in enumerate(folds):
+            truth = y[valid_start:valid_end, p]
+            base = np.tile(frequency(y[:valid_start, p]), (len(truth), 1))
+            fold_probs = {'smoothed_frequency': base}
+            for kind in ('random_forest', 'gradient_boosting'):
+                m = make_model(kind, 700 + p + 20 * fold_idx)
+                m.fit(X[:valid_start], y[:valid_start, p])
+                fold_probs[kind] = full_prob(m, X[valid_start:valid_end])
+            fold_probs['ensemble'] = normalize((base + fold_probs['random_forest'] +
+                                                fold_probs['gradient_boosting']) / 3)
+            for kind, values in fold_probs.items():
+                losses[kind].append(score(values, truth))
+        validation_losses = {kind: float(np.mean(values)) for kind, values in losses.items()}
         best = min(kinds, key=lambda name: validation_losses[name])
         # Conservative margin: modest retrospective differences are treated as noise.
         if validation_losses['smoothed_frequency'] - validation_losses[best] < .005:
@@ -198,7 +198,7 @@ def predict_one(rows):
     return {'draws': len(rows), 'last_draw': rows[-1][0].date().isoformat(),
             'recent': [''.join(map(str, ds)) for _, ds in rows[-40:][::-1]],
             'probabilities': output, 'validation': metrics,
-            'holdout_draws': test_n, 'selected_models': selection,
+            'holdout_draws': test_n, 'walkforward_folds': len(folds), 'selected_models': selection,
             'backtest': {'type': 'chronological unseen final test', 'draws': test_n,
                          'coverage': exact,
                          'uniform_expected_top_10': .01,
