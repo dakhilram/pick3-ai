@@ -259,3 +259,5 @@ $("copy").addEventListener("click",async()=>{
 $("refreshData").addEventListener("click",async()=>{const btn=$("refreshData");btn.disabled=true;btn.textContent="Checking…";try{await boot(true);}finally{btn.disabled=false;btn.textContent="↻ Check latest results";}});
 loadLab();
 boot();
+// Recheck published draws and recommendations without manual reload.
+setInterval(()=>{if(!document.hidden)boot();},5*60*1000);
