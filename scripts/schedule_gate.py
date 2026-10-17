@@ -22,8 +22,10 @@ if __name__ == "__main__":
     now = datetime.now(timezone.utc)
     event = os.environ.get("GITHUB_EVENT_NAME", "schedule")
     allowed = should_check(now, event)
+    local = now.astimezone(HOUSTON)
+    train = event != "schedule" or (local.hour == 23 and local.minute >= 25)
     path = os.environ.get("GITHUB_OUTPUT")
     if path:
         with open(path, "a", encoding="utf-8") as out:
             out.write(f"run={'true' if allowed else 'false'}\n")
-    print(f"Houston {now.astimezone(HOUSTON).isoformat()}; {event}; update={allowed}")
+    print(f"Houston {local.isoformat()}; {event}; update={allowed}; train={train}")
