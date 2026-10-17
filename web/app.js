@@ -55,6 +55,8 @@ function renderLive(){
  const rows=liveHistory?.games?.[session]||[];
  $("liveStatus").textContent=rows.length?"LIVE OUTCOMES VERIFIED":"AWAITING NEXT DRAW";
  $("liveCount").textContent=String(rows.length);
+ $("confidenceLive").textContent=rows.length?percent(rows.filter(r=>r.exact_any_hit).length/rows.length):"—";
+ $("confidenceSample").textContent=rows.length?`${rows.length} verified live draws; fair rate depends on selected permutations`:"No verified live outcomes yet";
  const metrics=[
   ["exact_hit","exact_fair_probability","liveExact","liveExactBaseline"],
   ["exact_any_hit","exact_any_fair_probability","liveAny","liveAnyBaseline"],
@@ -113,6 +115,10 @@ function render(){
   $("last").textContent=g.recent[0];
   $("lastDate").textContent=g.last_draw;
   $("holdout").textContent=g.holdout_draws.toLocaleString();
+  const mlSelected=(g.selected_models||g.validation.map(m=>m.selected)).filter(m=>m!=="smoothed_frequency").length;
+  $("confidenceTitle").textContent=mlSelected?"Models selected for "+mlSelected+" of 3 digit positions":"Historical frequency baseline selected";
+  $("confidenceDetail").textContent="This is validation-based model selection, not a reliable winning-confidence percentage. The same 3 digits can be used for Exact, Any or Exact/Any; matching rules and ticket costs differ. FIREBALL is optional and not scored.";
+  $("confidenceBacktest").textContent=g.backtest?.straight?.coverage?.top_5!=null?percent(g.backtest.straight.coverage.top_5):"—";
   const selected=g.selected_models||g.validation.map(m=>m.selected);
   $("performance").textContent=selected.filter(m=>m!=="smoothed_frequency").length+" / 3";
   const freq=frequencies(g.recent),max=Math.max(1,...freq);
