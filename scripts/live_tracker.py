@@ -48,8 +48,8 @@ def reconcile(previous, current, history):
         existing = records['games'].setdefault(session, [])
         if any(r['draw_date'] == draw_date for r in existing):
             continue
-        exact = ordered_picks(old['probabilities'])
-        boxes = box_picks(old['probabilities'])
+        exact = old.get('exact_any_picks') or ordered_picks(old['probabilities'])
+        boxes = [''.join(sorted(n)) for n in exact]
         winning = actual_game['recent'][0]
         any_exact_picks = set().union(*(permutations(n) for n in exact))
         box_covered = set().union(*(permutations(n) for n in boxes))
