@@ -189,6 +189,29 @@ def exact_any_picks(probabilities, count=5):
     return [g['best'] for g in chosen]
 
 
+
+def exact_any_backtest(prob_by_position, truth, count=5):
+    """Replay the SAME five Exact/Any tickets users see, on each unseen test draw."""
+    from itertools import permutations
+    exact_hits = 0
+    any_hits = 0
+    fair = 0.
+    for i, actual_digits in enumerate(truth):
+        probs = [np.asarray(p[i]) for p in prob_by_position]
+        tickets = exact_any_picks(probs, count)
+        actual = ''.join(map(str, actual_digits))
+        covered = set().union(*(set(''.join(p) for p in permutations(t)) for t in tickets))
+        exact_hits += actual in tickets
+        any_hits += actual in covered
+        fair += len(covered)/1000
+    n = len(truth)
+    return {'draws': n, 'ticket_count':count,
+            'exact_hit_rate':round(exact_hits/n,5),
+            'any_hit_rate':round(any_hits/n,5),
+            'exact_matches':int(exact_hits),'any_matches':int(any_hits),
+            'fair_exact_rate':count/1000,
+            'fair_any_rate':round(fair/n,5)}
+
 def predict_one(rows):
     if len(rows) < 700:
         raise ValueError('Insufficient historical draws')
@@ -288,6 +311,7 @@ def predict_one(rows):
     boxed = box_backtest(test_predictions, test_truth)
     chosen_exact_any = exact_any_picks(output)
     boxed['model'] = chosen_kind
+    ticket_test = exact_any_backtest(test_predictions, test_truth)
     return {'draws': len(rows), 'last_draw': rows[-1][0].date().isoformat(),
             'recent': [''.join(map(str, ds)) for _, ds in rows[-40:][::-1]],
             'probabilities': output, 'model_probabilities': alternatives, 'validation': metrics,
@@ -298,7 +322,7 @@ def predict_one(rows):
                                     'candidate_box_log_loss':{k:round(v,5) for k,v in validation_box_losses.items()}},
             'holdout_draws': test_n, 'walkforward_folds': len(folds), 'selected_models': selection,
             'backtest': {'type': 'chronological unseen final test', 'draws': test_n,
-                         'coverage': exact, 'straight': {'coverage': exact, 'fair_expected_coverage': {f'top_{k}':k/1000 for k in (1,5,10,20)}},
+                         'coverage': exact, 'exact_any': ticket_test, 'straight': {'coverage': exact, 'fair_expected_coverage': {f'top_{k}':k/1000 for k in (1,5,10,20)}},
                          'box': boxed,
                          'uniform_expected_top_10': .01,
                          'mean_position_log_loss': round(float(np.mean(
@@ -329,7 +353,7 @@ def main():
         print('Official', game, len(rows), rows[-1][0].date(), flush=True)
 
     training_mode = os.environ.get('PICK3_TRAIN_MODE', 'train')
-    if training_mode == 'refresh' and previous and previous.get('schema_version') == 7:
+    if training_mode == 'refresh' and previous and previous.get('schema_version') == 8:
         payload = json.loads(json.dumps(previous))
         changed = False
         for game, rows in source_rows.items():
@@ -362,7 +386,7 @@ def main():
         except (KeyError, TypeError, ValueError):
             pass
 
-    payload = {'schema_version': 7, 'generated_at': datetime.now(timezone.utc).isoformat(),
+    payload = {'schema_version': 8, 'generated_at': datetime.now(timezone.utc).isoformat(),
                'source': BASE, 'games': {}}
     for game in GAMES:
         obj = predict_one(source_rows[game])
