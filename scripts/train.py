@@ -211,7 +211,7 @@ def predict_one(rows):
 
 
 def main():
-    payload = {'schema_version': 2, 'generated_at': datetime.now(timezone.utc).isoformat(),
+    payload = {'schema_version': 3, 'generated_at': datetime.now(timezone.utc).isoformat(),
                'source': BASE, 'games': {}}
     for game in GAMES:
         url = BASE + f'pick3{game}.csv'
@@ -229,7 +229,7 @@ def main():
     if target.exists():
         try:
             previous = json.loads(target.read_text(encoding='utf-8'))
-            if previous.get('schema_version') == 2 and all(
+            if previous.get('schema_version') == 3 and all(
                 previous['games'][g]['last_draw'] == payload['games'][g]['last_draw'] and
                 previous['games'][g]['recent'] == payload['games'][g]['recent']
                 for g in GAMES
