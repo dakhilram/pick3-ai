@@ -1,104 +1,243 @@
-"""Official Texas Lottery data -> leak-free chronological evaluation -> predictions JSON."""
-import csv, io, json, urllib.request
-from collections import Counter
+"""PICK3 AI: leakage-aware comparison of statistical and tree models.
+
+Research-only model scores are not calibrated lottery winning probabilities.
+"""
+import csv
+import io
+import json
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import log_loss
 
-BASE='https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/'
-GAMES=['morning','day','evening','night']
-ROOT=Path(__file__).resolve().parents[1]
-WINDOW=40
+import numpy as np
+from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
+
+BASE = 'https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/'
+GAMES = ('morning', 'day', 'evening', 'night')
+ROOT = Path(__file__).resolve().parents[1]
+WINDOW = 60
+MAX_TRAIN = 2600
+LABELS = np.arange(10)
+EPS = 1e-8
+
 
 def parse(data, game):
-    records=[]
+    records = {}
     for row in csv.reader(io.StringIO(data)):
-        if len(row)<7: continue
+        if len(row) < 7 or game not in row[0].lower():
+            continue
         try:
-            month,day,year=map(int,row[1:4]); digits=tuple(int(x) for x in row[4:7])
-            if any(x not in range(10) for x in digits): continue
-            dt=datetime(year,month,day)
-            records.append((dt,digits))
-        except (ValueError,TypeError): continue
-    return sorted(dict(records).items())
+            month, day, year = map(int, row[1:4])
+            digits = tuple(map(int, row[4:7]))
+            date = datetime(year, month, day)
+        except (ValueError, TypeError):
+            continue
+        if all(0 <= d <= 9 for d in digits):
+            if date in records and records[date] != digits:
+                raise ValueError(f'Conflicting draws for {game} {date.date()}')
+            records[date] = digits
+    return sorted(records.items())
+
 
 def features(history):
-    """Only prior draws, never the draw being predicted."""
-    prior=np.array(history[-WINDOW:],dtype=float)
-    vals=[]
-    for pos in range(3):
-        seq=prior[:,pos].astype(int)
-        for length in (10,20,40):
-            counts=np.bincount(seq[-length:],minlength=10)/length
-            vals.extend(counts.tolist())
-        vals.extend((seq[-5:]/9).tolist())
-    sums=prior.sum(axis=1)
-    vals += [float(np.mean(sums))/27,float(np.std(sums))/14]
-    return vals
+    """Features calculated entirely from preceding results."""
+    a = np.asarray(history[-WINDOW:], dtype=int)
+    if len(a) < WINDOW or a.shape[1:] != (3,):
+        raise ValueError('60 prior draws are required')
+    values = []
+    for p in range(3):
+        seq = a[:, p]
+        for length in (10, 20, 40, 60):
+            values.extend((np.bincount(seq[-length:], minlength=10) / length).tolist())
+        values.extend((seq[-6:] / 9).tolist())
+        values.append(float(np.mean(seq)) / 9)
+        values.append(float(np.std(seq)) / 5)
+    sums = a.sum(axis=1)
+    for length in (10, 30, 60):
+        values.extend([float(np.mean(sums[-length:])) / 27,
+                       float(np.std(sums[-length:])) / 14])
+    values.extend((np.bincount(sums, minlength=28) / len(sums)).tolist())
+    repeats = np.asarray([len(set(row)) for row in a])
+    values.extend([(repeats == k).mean() for k in (1, 2, 3)])
+    values.extend([(a % 2).mean(axis=0).tolist()][0])
+    for p in range(3):
+        for q in range(p + 1, 3):
+            pair = a[:, p] * 10 + a[:, q]
+            values.extend((np.bincount(pair[-30:], minlength=100) / 30).tolist())
+    values.extend((a[-1] / 9).tolist())
+    return np.asarray(values, dtype=float)
+
 
 def build(rows):
-    nums=[r[1] for r in rows]
-    X=np.asarray([features(nums[:i]) for i in range(WINDOW,len(nums))])
-    y=np.asarray(nums[WINDOW:])
-    return X,y
+    nums = [digits for _, digits in rows]
+    X = np.asarray([features(nums[:i]) for i in range(WINDOW, len(nums))])
+    y = np.asarray(nums[WINDOW:], dtype=int)
+    return X, y
+
+
+def frequency(y):
+    if len(y) == 0:
+        return np.full(10, .1)
+    counts = np.bincount(y, minlength=10).astype(float) + 1
+    return counts / counts.sum()
+
+
+def normalize(p):
+    p = np.maximum(np.asarray(p, dtype=float), EPS)
+    return p / p.sum(axis=-1, keepdims=True)
+
+
+def full_prob(model, X):
+    raw = model.predict_proba(X)
+    result = np.full((len(X), 10), EPS)
+    for i, digit in enumerate(model.classes_):
+        result[:, int(digit)] = raw[:, i]
+    return normalize(result)
+
+
+def make_model(kind, seed):
+    if kind == 'random_forest':
+        return RandomForestClassifier(n_estimators=80, max_depth=7,
+                                      min_samples_leaf=12, random_state=seed, n_jobs=2)
+    if kind == 'gradient_boosting':
+        return HistGradientBoostingClassifier(max_iter=85, max_leaf_nodes=12,
+                                              l2_regularization=8, min_samples_leaf=30,
+                                              learning_rate=.04, random_state=seed)
+    raise ValueError(kind)
+
+
+def score(probs, actual):
+    return float(-np.log(np.maximum(probs[np.arange(len(actual)), actual], EPS)).mean())
+
+
+def top_hit(prob_by_position, truth, k):
+    """Top-k exact-order coverage, using all three independent positional scores."""
+    # Each test row has a score for all 1000 combinations.
+    universe = np.asarray([(i, j, k0) for i in range(10)
+                           for j in range(10) for k0 in range(10)], dtype=int)
+    combined = (prob_by_position[0][:, universe[:, 0]] *
+                prob_by_position[1][:, universe[:, 1]] *
+                prob_by_position[2][:, universe[:, 2]])
+    idx = np.argpartition(combined, -k, axis=1)[:, -k:]
+    actual = truth[:, 0] * 100 + truth[:, 1] * 10 + truth[:, 2]
+    return float(np.mean(np.any(idx == actual[:, None], axis=1)))
+
 
 def predict_one(rows):
-    if len(rows)<WINDOW+120: raise ValueError('Insufficient history for ML training')
-    X,y=build(rows)
-    split=int(len(X)*0.8)
-    if split<100 or len(X)-split<20:raise ValueError('Insufficient chronological test data')
-    out=[]; metrics=[]
+    if len(rows) < 700:
+        raise ValueError('Insufficient historical draws')
+    X, y = build(rows)
+    # Bound training cost and keep chronology; no future rows in earlier features.
+    X, y = X[-MAX_TRAIN:], y[-MAX_TRAIN:]
+    n = len(X)
+    test_n = min(300, max(100, n // 6))
+    val_n = min(300, max(100, n // 6))
+    train_end = n - test_n - val_n
+    if train_end < 250:
+        raise ValueError('Insufficient chronological training data')
+    # Two expanding-window validation folds; final test segment is untouched.
+    folds = [(max(250, train_end - val_n), train_end - val_n, train_end),
+             (train_end, train_end, n - test_n)]
+    # First fold uses a preceding validation block and second is the actual
+    # selection block. Avoid overlap with the final test segment.
+    folds = [(max(250, train_end - val_n), train_end - val_n, train_end)]
+    kinds = ('smoothed_frequency', 'random_forest', 'gradient_boosting', 'ensemble')
+    metrics = []
+    output = []
+    test_predictions = []
+    selection = []
     for p in range(3):
-        model=RandomForestClassifier(n_estimators=120,max_depth=6,min_samples_leaf=15,
-                                     random_state=240+p,n_jobs=-1)
-        model.fit(X[:split],y[:split,p]); prob=model.predict_proba(X[split:])
-        full=np.zeros((len(prob),10))
-        for j,digit in enumerate(model.classes_):full[:,int(digit)]=prob[:,j]
-        full=np.maximum(full,1e-6);full/=full.sum(axis=1,keepdims=True)
-        model_loss=float(log_loss(y[split:,p],full,labels=list(range(10))))
-        baseline=np.bincount(y[:split,p],minlength=10)+1
-        baseline=baseline/baseline.sum()
-        base_loss=float(log_loss(y[split:,p],np.tile(baseline,(len(prob),1)),labels=list(range(10))))
-        # Deploy only if retrospective holdout improves on baseline, else baseline.
-        if model_loss<base_loss:
-            model.fit(X,y[:,p]); current=np.zeros(10)
-            for digit,v in zip(model.classes_,model.predict_proba([features([r[1] for r in rows])])[0]):
-                current[int(digit)]=v
-            chosen='random_forest'
-        else:
-            current=(np.bincount(y[:,p],minlength=10)+1).astype(float)
-            chosen='smoothed_frequency'
-        current=np.maximum(current,1e-6);current/=current.sum()
-        out.append([round(float(x),9) for x in current]);
-        metrics.append({'position':p+1,'model_log_loss':round(model_loss,4),'baseline_log_loss':round(base_loss,4),'selected':chosen})
-    return {'draws':len(rows),'last_draw':rows[-1][0].date().isoformat(),
-            'recent':[''.join(map(str,ds)) for _,ds in rows[-40:][::-1]],
-            'probabilities':out,'validation':metrics,'holdout_draws':len(X)-split}
+        start, valid_start, valid_end = folds[0]
+        truth = y[valid_start:valid_end, p]
+        base = np.tile(frequency(y[:start, p]), (len(truth), 1))
+        fold_probs = {'smoothed_frequency': base}
+        models = {}
+        for kind in ('random_forest', 'gradient_boosting'):
+            m = make_model(kind, 700 + p)
+            m.fit(X[:start], y[:start, p])
+            fold_probs[kind] = full_prob(m, X[valid_start:valid_end])
+            models[kind] = m
+        fold_probs['ensemble'] = normalize((base + fold_probs['random_forest'] +
+                                            fold_probs['gradient_boosting']) / 3)
+        validation_losses = {kind: score(arr, truth) for kind, arr in fold_probs.items()}
+        best = min(kinds, key=lambda name: validation_losses[name])
+        # Conservative margin: modest retrospective differences are treated as noise.
+        if validation_losses['smoothed_frequency'] - validation_losses[best] < .005:
+            best = 'smoothed_frequency'
+        selection.append(best)
+        test_train = n - test_n
+        baseline = frequency(y[:test_train, p])
+        preds = {'smoothed_frequency': np.tile(baseline, (test_n, 1))}
+        next_preds = {'smoothed_frequency': frequency(y[:, p])}
+        for kind in ('random_forest', 'gradient_boosting'):
+            m = make_model(kind, 900 + p)
+            m.fit(X[:test_train], y[:test_train, p])
+            preds[kind] = full_prob(m, X[test_train:])
+            m.fit(X, y[:, p])
+            next_preds[kind] = full_prob(m, features([r[1] for r in rows])[None, :])[0]
+        preds['ensemble'] = normalize((preds['smoothed_frequency'] +
+                                       preds['random_forest'] + preds['gradient_boosting']) / 3)
+        next_preds['ensemble'] = normalize((next_preds['smoothed_frequency'] +
+                                            next_preds['random_forest'] + next_preds['gradient_boosting']) / 3)
+        selected_test = preds[best]
+        test_predictions.append(selected_test)
+        output.append(normalize(next_preds[best]).round(9).tolist())
+        metrics.append({
+            'position': p + 1, 'selected': best,
+            'validation_log_loss': round(validation_losses[best], 5),
+            'model_log_loss': round(validation_losses['random_forest'], 5),
+            'baseline_log_loss': round(validation_losses['smoothed_frequency'], 5),
+            'candidate_log_loss': {k: round(v, 5) for k, v in validation_losses.items()},
+            'test_log_loss': round(score(selected_test, y[test_train:, p]), 5),
+            'test_uniform_log_loss': round(float(np.log(10)), 5)
+        })
+    test_truth = y[-test_n:]
+    exact = {}
+    for k in (1, 5, 10, 20):
+        exact[f'top_{k}'] = round(top_hit(test_predictions, test_truth, k), 5)
+    return {'draws': len(rows), 'last_draw': rows[-1][0].date().isoformat(),
+            'recent': [''.join(map(str, ds)) for _, ds in rows[-40:][::-1]],
+            'probabilities': output, 'validation': metrics,
+            'holdout_draws': test_n, 'selected_models': selection,
+            'backtest': {'type': 'chronological unseen final test', 'draws': test_n,
+                         'coverage': exact,
+                         'uniform_expected_top_10': .01,
+                         'mean_position_log_loss': round(float(np.mean(
+                             [m['test_log_loss'] for m in metrics])), 5),
+                         'uniform_position_log_loss': round(float(np.log(10)), 5)}}
+
 
 def main():
-    payload={'generated_at':datetime.now(timezone.utc).isoformat(), 'source':BASE,'games':{}}
+    payload = {'schema_version': 2, 'generated_at': datetime.now(timezone.utc).isoformat(),
+               'source': BASE, 'games': {}}
     for game in GAMES:
-        url=BASE+f'pick3{game}.csv'
-        with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'PICK3-AI/1.0'}),timeout=35) as resp:
-            text=resp.read().decode('utf-8-sig')
-        rows=parse(text,game)
-        obj=predict_one(rows)
-        obj['source_url']=url
-        payload['games'][game]=obj
-        print(game,obj['draws'],obj['last_draw'],[m['selected'] for m in obj['validation']])
-    target=ROOT/'web'/'data'/'predictions.json'
+        url = BASE + f'pick3{game}.csv'
+        req = urllib.request.Request(url, headers={'User-Agent': 'PICK3-AI/2.0'})
+        with urllib.request.urlopen(req, timeout=40) as response:
+            data = response.read().decode('utf-8-sig')
+        rows = parse(data, game)
+        if not rows:
+            raise ValueError(f'No usable official records: {game}')
+        payload['games'][game] = predict_one(rows)
+        payload['games'][game]['source_url'] = url
+        print(game, len(rows), rows[-1][0].date(), flush=True)
+    target = ROOT / 'web' / 'data' / 'predictions.json'
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.exists():
         try:
-            previous=json.loads(target.read_text(encoding='utf-8'))
-            if all(previous['games'][game]['last_draw']==payload['games'][game]['last_draw'] and
-                   previous['games'][game]['recent']==payload['games'][game]['recent'] for game in GAMES):
-                print('No new official draws; preserving previous model output')
+            previous = json.loads(target.read_text(encoding='utf-8'))
+            if previous.get('schema_version') == 2 and all(
+                previous['games'][g]['last_draw'] == payload['games'][g]['last_draw'] and
+                previous['games'][g]['recent'] == payload['games'][g]['recent']
+                for g in GAMES
+            ):
+                print('Official draw history unchanged; keeping previous predictions')
                 return
-        except (ValueError, KeyError, TypeError):
+        except (KeyError, ValueError, TypeError):
             pass
-    target.write_text(json.dumps(payload,indent=2)+'\n',encoding='utf-8')
-    print('wrote',target)
-if __name__=='__main__':main()
+    target.write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8')
+    print('Generated', target)
+
+
+if __name__ == '__main__':
+    main()
