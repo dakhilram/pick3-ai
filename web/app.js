@@ -34,6 +34,19 @@ function combinations(probs){
  for(const i of digits)for(const j of digits)for(const k of digits)list.push({n:`${i}${j}${k}`,p:probs[0][i]*probs[1][j]*probs[2][k]});
  return list.sort((a,b)=>b.p-a.p||a.n.localeCompare(b.n));
 }
+
+function boxCombinations(probs){
+ const groups = new Map();
+ for(const entry of combinations(probs)){
+  const key = [...entry.n].sort().join("");
+  if(!groups.has(key))groups.set(key,{n:key,p:0,permutations:[]});
+  const group=groups.get(key);
+  group.p += entry.p;
+  group.permutations.push(entry.n);
+ }
+ return [...groups.values()].sort((a,b)=>b.p-a.p||a.n.localeCompare(b.n));
+}
+
 function render(){
  if(!dataset)return;
  const name=$("draw").value, strategy=$("strategy").value;
@@ -41,13 +54,17 @@ function render(){
  try{
   const scores=getScores(g,strategy),n=Number($("count").value);
   if(!validProbabilityRows(scores)||![5,10,20,50].includes(n))throw Error("Invalid rankings");
-  visible=combinations(scores).slice(0,n);
+  const play=$("playType").value;
+  if(!["straight","box"].includes(play))throw Error("Invalid play type");
+  visible=(play==="box"?boxCombinations(scores):combinations(scores)).slice(0,n);
+  $("playBadge").textContent=play==="box"?"BOX · ANY ORDER":"STRAIGHT · EXACT ORDER";
+  $("playHelp").textContent=play==="box"?"Box groups sum scores for all distinct orders of the same digits. 1, 3, or 6 orders per group; these scores are not verified winning odds.":"Straight ranks individual 000–999 outcomes; each exact result has a fair-draw chance of 0.1%.";
   // Present scores as relative rankings, not certified odds.
   $("numbers").replaceChildren(...visible.map((entry,i)=>{
    const el=document.createElement("div");el.className="number";
    const rank=document.createElement("span");rank.className="rank";rank.textContent="#"+String(i+1).padStart(2,"0");
    const number=document.createElement("strong");number.textContent=entry.n;
-   const score=document.createElement("small");score.textContent=(entry.p*100).toFixed(3)+"% score";
+   const score=document.createElement("small");score.textContent=(entry.p*100).toFixed(3)+"% score"+(play==="box"?" · "+entry.permutations.length+" ways":"");
    el.append(rank,number,score);return el;
   }));
   $("total").textContent=g.draws.toLocaleString();
@@ -72,7 +89,8 @@ function render(){
    el.append(label,result);return el;
   }));
   const b=g.backtest;
-  $("backtest").textContent=b?`Unseen ${b.draws} draws · Top 1: ${(100*b.coverage.top_1).toFixed(2)}% · Top 10: ${(100*b.coverage.top_10).toFixed(2)}% (fair baseline 1%) · Top 20: ${(100*b.coverage.top_20).toFixed(2)}% · Mean position log loss: ${Number(b.mean_position_log_loss).toFixed(3)} (uniform: 2.303).`:"Older output format: independent test diagnostics unavailable.";
+  const report=play==="box"?b?.box:b?.straight;
+  $("backtest").textContent=report?`Unseen ${b.draws} draws · ${play==="box"?"Unique Box":"Straight"} top 1: ${(100*report.coverage.top_1).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_1).toFixed(2)}%) · Top 10: ${(100*report.coverage.top_10).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_10).toFixed(2)}%) · Top 20: ${(100*report.coverage.top_20).toFixed(2)}% (fair ${(100*report.fair_expected_coverage.top_20).toFixed(2)}%).`: "This play-type backtest is not published yet. Await the next model refresh.";
   $("alert").className="alert ok";
   $("alert").textContent=`Showing ${name} research through ${g.last_draw}. Dataset generated ${new Date(dataset.generated_at).toLocaleString()}. ${strategy==="model"?"Automatic validation-selected models.":"Exploratory ranking: "+$("strategy").selectedOptions[0].textContent+"."} Historical patterns are not verified winning odds.`;
  }catch(e){visible=[];$("alert").className="alert error";$("alert").textContent=e.message;}
@@ -92,11 +110,11 @@ async function boot(){
   $("alert").textContent=error.message+" Check the latest training run on GitHub Actions.";
  }
 }
-for(const key of ["draw","strategy","count"])$(key).addEventListener("change",render);
+for(const key of ["draw","strategy","count","playType"])$(key).addEventListener("change",render);
 $("rerank").addEventListener("click",render);
 $("copy").addEventListener("click",async()=>{
  if(!visible.length)return;
- const text=visible.map(x=>x.n).join(", ");
+ const text=visible.map(x=>x.n+(x.permutations?" ["+x.permutations.join("/") +"]":"")).join(", ");
  try{await navigator.clipboard.writeText(text);$("copy").textContent="Copied!";}
  catch{window.prompt("Copy these combinations:",text);}
  setTimeout(()=>$("copy").textContent="Copy displayed combinations",1600);
