@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from train import parse, features, build, frequency, normalize, top_hit, make_model, BOX_GROUPS, box_backtest, box_log_loss, exact_any_picks
+from train import parse, features, build, frequency, normalize, top_hit, make_model, BOX_GROUPS, box_backtest, box_log_loss, exact_any_picks, exact_any_backtest
 from live_tracker import ordered_picks, box_picks, reconcile, permutations
 from schedule_gate import should_check, HOUSTON, CHECKS
 from datetime import datetime
@@ -117,6 +117,16 @@ class Tests(unittest.TestCase):
         self.assertEqual(len({''.join(sorted(n)) for n in picks}),5)
         same=[np.tile(np.eye(10)[1],(2,1))]*3
         self.assertLess(box_log_loss(same,np.array([[1,1,1],[1,1,1]])),.001)
+
+    def test_exact_any_ticket_backtest_matches_displayed_tickets(self):
+        uniform = [np.full((2,10), .1) for _ in range(3)]
+        report = exact_any_backtest(uniform, np.asarray([[0,1,2],[9,9,9]]), count=5)
+        tickets = exact_any_picks([[.1]*10]*3,5)
+        self.assertEqual(report['any_matches'],sum(
+            ''.join(sorted(actual)) in [''.join(sorted(n)) for n in tickets]
+            for actual in ('012','999')))
+        self.assertAlmostEqual(report['fair_exact_rate'],.005)
+        self.assertEqual(report['draws'],2)
 
     def test_models_build(self):
         self.assertIsNotNone(make_model('random_forest', 1))
