@@ -5,6 +5,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from train import parse, features, build, frequency, normalize, top_hit, make_model, BOX_GROUPS, box_backtest
+from live_tracker import ordered_picks, box_picks, reconcile, permutations
 
 
 class Tests(unittest.TestCase):
@@ -54,6 +55,31 @@ class Tests(unittest.TestCase):
         uniform=np.full((2,10),.1)
         report=box_backtest([uniform]*3,np.asarray([[0,0,0],[1,1,1]]))
         self.assertEqual(report['groups'],220)
+
+    def test_live_tracking_without_future_leakage(self):
+        uniform = [[.1] * 10 for _ in range(3)]
+        prev = {'generated_at': '2026-10-15T22:00:00+00:00',
+                'games': {'morning': {'last_draw': '2026-10-15',
+                                      'recent': ['123', '999'], 'probabilities': uniform}}}
+        current = {'games': {'morning': {'last_draw': '2026-10-16', 'recent': ['321', '123', '999']}}}
+        result = reconcile(prev, current, None)
+        self.assertEqual(len(result['games']['morning']), 1)
+        record = result['games']['morning'][0]
+        self.assertEqual(record['actual'], '321')
+        self.assertEqual(record['published_prediction_at'], prev['generated_at'])
+        self.assertEqual(len(record['exact_picks']), 5)
+        self.assertEqual(len(record['box_picks']), 5)
+        self.assertEqual(len(reconcile(prev, current, result)['games']['morning']), 1)
+        bad = {'games': {'morning': {'last_draw':'2026-10-18','recent':['222','888','123']}}}
+        self.assertEqual(len(reconcile(prev,bad,{'games':{}}).get('games',{})),0)
+
+    def test_live_group_counts(self):
+        self.assertEqual(len(permutations('123')),6)
+        self.assertEqual(len(permutations('112')),3)
+        self.assertEqual(len(permutations('777')),1)
+        uniform=[[.1]*10 for _ in range(3)]
+        self.assertEqual(len(ordered_picks(uniform)),5)
+        self.assertEqual(len(box_picks(uniform)),5)
 
     def test_models_build(self):
         self.assertIsNotNone(make_model('random_forest', 1))
