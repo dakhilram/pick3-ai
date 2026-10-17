@@ -4,7 +4,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from train import parse, features, build, frequency, normalize, top_hit, make_model, BOX_GROUPS, box_backtest
+from train import parse, features, build, frequency, normalize, top_hit, make_model, BOX_GROUPS, box_backtest, box_log_loss, exact_any_picks
 from live_tracker import ordered_picks, box_picks, reconcile, permutations
 from schedule_gate import should_check, HOUSTON, CHECKS
 from datetime import datetime
@@ -109,6 +109,14 @@ class Tests(unittest.TestCase):
         self.assertFalse(should_check(sunday))
         self.assertTrue(should_check(sunday, event="workflow_dispatch"))
         self.assertFalse(should_check(datetime(2026,1,17,9,30,tzinfo=HOUSTON)))
+
+    def test_exact_any_ranks_groups_without_duplication(self):
+        uniform=[[.1]*10 for _ in range(3)]
+        picks=exact_any_picks(uniform,5)
+        self.assertEqual(len(picks),5)
+        self.assertEqual(len({''.join(sorted(n)) for n in picks}),5)
+        same=[np.tile(np.eye(10)[1],(2,1))]*3
+        self.assertLess(box_log_loss(same,np.array([[1,1,1],[1,1,1]])),.001)
 
     def test_models_build(self):
         self.assertIsNotNone(make_model('random_forest', 1))
