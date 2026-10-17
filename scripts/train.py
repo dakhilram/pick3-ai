@@ -145,6 +145,7 @@ def predict_one(rows):
     output = []
     test_predictions = []
     selection = []
+    alternatives = {name: [] for name in ('smoothed_frequency', 'random_forest', 'gradient_boosting', 'ensemble')}
     for p in range(3):
         losses = {kind: [] for kind in kinds}
         for fold_idx, (valid_start, valid_end) in enumerate(folds):
@@ -182,6 +183,8 @@ def predict_one(rows):
         selected_test = preds[best]
         test_predictions.append(selected_test)
         output.append(normalize(next_preds[best]).round(9).tolist())
+        for name in alternatives:
+            alternatives[name].append(normalize(next_preds[name]).round(9).tolist())
         metrics.append({
             'position': p + 1, 'selected': best,
             'validation_log_loss': round(validation_losses[best], 5),
@@ -197,7 +200,7 @@ def predict_one(rows):
         exact[f'top_{k}'] = round(top_hit(test_predictions, test_truth, k), 5)
     return {'draws': len(rows), 'last_draw': rows[-1][0].date().isoformat(),
             'recent': [''.join(map(str, ds)) for _, ds in rows[-40:][::-1]],
-            'probabilities': output, 'validation': metrics,
+            'probabilities': output, 'model_probabilities': alternatives, 'validation': metrics,
             'holdout_draws': test_n, 'walkforward_folds': len(folds), 'selected_models': selection,
             'backtest': {'type': 'chronological unseen final test', 'draws': test_n,
                          'coverage': exact,
@@ -235,7 +238,10 @@ def main():
                 return
         except (KeyError, ValueError, TypeError):
             pass
-    target.write_text(json.dumps(payload, indent=2) + '\n', encoding='utf-8')
+    import os
+    temporary = target.with_suffix('.json.tmp')
+    temporary.write_text(json.dumps(payload, indent=2, allow_nan=False) + '\n', encoding='utf-8')
+    os.replace(temporary, target)
     print('Generated', target)
 
 
