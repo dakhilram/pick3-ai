@@ -182,7 +182,7 @@ function render(){
    const el=document.createElement("div");el.className="number";
    const rank=document.createElement("span");rank.className="rank";rank.textContent="#"+String(i+1).padStart(2,"0");
    const number=document.createElement("strong");number.textContent=entry.n;
-   const score=document.createElement("small");score.textContent=(entry.p*100).toFixed(3)+"% score"+((play==="box"||play==="combo")?" · "+entry.permutations.length+" ways":"");
+   const score=document.createElement("small");score.textContent="Ranked pick";
    el.append(rank,number,score);return el;
   }));
   $("total").textContent=g.draws.toLocaleString();
@@ -260,7 +260,7 @@ $("copy").addEventListener("click",async()=>{
  setTimeout(()=>$("copy").textContent="Copy displayed combinations",1600);
 });
 $("refreshData").addEventListener("click",async()=>{const btn=$("refreshData");btn.disabled=true;btn.textContent="Checking…";try{await boot(true);}finally{btn.disabled=false;btn.textContent="↻ Check latest results";}});
-loadLab();
+// Heavy-model laptop reports are intentionally not loaded by the daily dashboard.
 boot();
 // Recheck published draws and recommendations without manual reload.
 setInterval(()=>{if(!document.hidden)boot();},5*60*1000);
