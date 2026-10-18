@@ -226,6 +226,9 @@ function render(){
 }
 async function boot(announce=false){
  try{
+  // Follow the upcoming draw unless the visitor explicitly selected a session.
+  const upcoming=showNextDraw();
+  if(!sessionStorage.getItem("pick3-draw"))$("draw").value=upcoming;
   const response=await fetch("data/predictions.json",{cache:"no-store"});
   if(!response.ok)throw Error("Results are not published yet (HTTP "+response.status+").");
   const incoming=validate(await response.json());
@@ -235,7 +238,7 @@ async function boot(announce=false){
   document.querySelector(".status").classList.add("ok");
   render();
   await loadLive();
-  if(announce&&previous==dataset.generated_at){$("alert").textContent="No new official dataset published since "+houstonTime(dataset.generated_at)+". Your rankings remain unchanged.";}
+  if(announce&&previous==dataset.generated_at&&!(dataset.official_checked_at)){$("alert").textContent="No new official dataset published since "+houstonTime(dataset.generated_at)+". Your rankings remain unchanged.";}
  }catch(error){
   if(dataset&&announce){$("alert").className="alert error";$("alert").textContent="Could not check for newer data. Your previously loaded rankings remain available.";return;}
   $("dataStatus").textContent="Data unavailable";
