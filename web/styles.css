@@ -19,3 +19,39 @@
 #unused-research-ui[hidden]{display:none!important}
 @media(max-width:850px){.simple-workspace{grid-template-columns:1fr}.simple-side .stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.simple-filters{grid-template-columns:1fr}.simple-filters button{width:100%}.compact-hero{padding-top:20px}.simple-side .stats{grid-template-columns:1fr 1fr}.simple-side .stat{padding:14px;min-height:112px}.simple-side .stat strong{font-size:25px}}
+
+
+/* Restored balanced dashboard: predictions first, evidence immediately below. */
+.spacious-ranking{margin:20px 0;padding:30px 32px}
+.spacious-ranking .numbers{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:13px;margin:27px 0 23px}
+.spacious-ranking .number{min-height:125px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:15px 8px}
+.spacious-ranking .number strong{font-size:clamp(27px,3.2vw,42px);letter-spacing:.07em}
+.spacious-ranking .number small{font-size:11px;text-align:center}
+.spacious-ranking .number .rank{font-size:12px}
+.expanded-stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:0 0 18px}
+.expanded-stats .stat{min-height:122px}
+.expanded-stats .model-name{font-size:20px;text-transform:capitalize;overflow-wrap:anywhere;line-height:1.2}
+.accuracy-panel{margin:18px 0;padding:26px;grid-template-columns:minmax(0,1fr) minmax(0,1.55fr);align-items:start}
+.accuracy-panel .confidence-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+.accuracy-panel .confidence-values>div{min-height:107px}
+.accuracy-panel .confidence-values strong{font-size:clamp(19px,2.2vw,29px)}
+.accuracy-panel .confidence-values #evidenceStatus{font-size:21px}
+.recent-panel{padding:24px 28px;margin-top:18px}
+.recent-panel .live-rows{margin-top:16px;grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:1000px){
+ .spacious-ranking .numbers{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .accuracy-panel{grid-template-columns:1fr}
+ .recent-panel .live-rows{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:650px){
+ .spacious-ranking{padding:20px 17px}
+ .spacious-ranking .numbers{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .spacious-ranking .number{min-height:105px}
+ .spacious-ranking .number strong{font-size:35px}
+ .expanded-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .accuracy-panel{padding:20px 16px}
+ .accuracy-panel .confidence-values{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .accuracy-panel .confidence-values>div{padding:12px}
+ .recent-panel{padding:19px 16px}
+ .recent-panel .live-rows{grid-template-columns:1fr}
+}
