@@ -27,6 +27,32 @@
         "exact_fair_probability": 0.005,
         "exact_any_fair_probability": 0.027,
         "box_fair_probability": 0.03
+      },
+      {
+        "draw_date": "2026-10-17",
+        "published_prediction_at": "2026-10-17T23:32:34.170546+00:00",
+        "last_known_draw": "2026-10-16",
+        "actual": "619",
+        "exact_picks": [
+          "745",
+          "374",
+          "742",
+          "748",
+          "345"
+        ],
+        "box_picks": [
+          "457",
+          "347",
+          "247",
+          "478",
+          "345"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
+        "box_fair_probability": 0.03
       }
     ],
     "morning": [
