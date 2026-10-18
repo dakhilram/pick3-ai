@@ -9,12 +9,28 @@
 <section class="filters panel simple-filters" aria-label="Pick3 draw controls"><div class="control"><label for="draw">DRAW SESSION</label><select id="draw"><option value="morning">Morning · 10:00 AM</option><option value="day">Day · 12:27 PM</option><option value="evening">Evening · 6:00 PM</option><option value="night">Night · 10:12 PM</option></select></div><button id="refreshData" type="button" class="secondary-button">↻ Check updates</button></section>
 <p id="nextDraw" class="next-draw" aria-live="polite">Checking next Houston drawing…</p>
 <div id="alert" class="alert" role="status">Loading official draw results…</div>
-<section class="workspace simple-workspace">
-<div class="panel ranking"><div class="section-heading"><div><p class="kicker">RECOMMENDED FOR SELECTED DRAW</p><h2>Five Exact/Any numbers</h2></div><span id="playBadge" class="chip">EXACT/ANY</span></div><p id="playHelp" class="subtle">50¢ Exact + 50¢ Any Order per number. Five tickets cost $5 without Fireball.</p><div id="numbers" class="numbers" aria-live="polite"><p class="empty">Loading predictions…</p></div><div class="ranking-footer"><button type="button" id="copy" class="secondary">Copy five numbers</button><small>Model rankings are not guaranteed winning odds.</small></div></div>
-<div class="simple-side">
-<section class="stats" aria-label="Draw information"><div class="stat panel"><span>LATEST OFFICIAL RESULT</span><strong id="last">—</strong><small id="lastDate">Checking date…</small></div><div class="stat panel"><span>DRAWS ANALYZED</span><strong id="total">—</strong><small>Selected session</small></div></section>
-<section class="panel confidence-panel" aria-label="Historical Exact/Any performance"><div><p class="kicker">MODEL TRACK RECORD</p><h2 id="confidenceTitle">Checking model</h2><p class="subtle">Historical results do not guarantee future wins.</p></div><div class="confidence-values"><div><small>HISTORICAL EXACT/ANY</small><strong id="confidenceBacktest">—</strong><span>Five-number held-out test</span></div><div><small>LIVE EXACT/ANY</small><strong id="confidenceLive">—</strong><span id="confidenceSample">Awaiting verified outcomes</span></div></div></section>
-</div></section>
+<section class="panel ranking spacious-ranking">
+<div class="section-heading"><div><p class="kicker">YOUR NEXT PICK 3 SELECTIONS</p><h2>Five Exact/Any numbers</h2></div><span id="playBadge" class="chip">EXACT/ANY</span></div>
+<p id="playHelp" class="subtle">Each number: 50¢ Exact + 50¢ Any Order. Five tickets cost $5 total without Fireball.</p>
+<div id="numbers" class="numbers" aria-live="polite"><p class="empty">Loading predictions…</p></div>
+<div class="ranking-footer"><button type="button" id="copy" class="secondary">Copy five numbers</button><small>Research-based rankings, not guaranteed winning odds.</small></div>
+</section>
+<section class="stats expanded-stats" aria-label="Draw overview">
+<div class="stat panel"><span>LATEST OFFICIAL RESULT</span><strong id="last">—</strong><small id="lastDate">Checking date…</small></div>
+<div class="stat panel"><span>DRAWS ANALYZED</span><strong id="total">—</strong><small>For selected session</small></div>
+<div class="stat panel"><span>TEST DRAWINGS</span><strong id="visibleTestDraws">—</strong><small>Historically held out</small></div>
+<div class="stat panel"><span>SELECTED MODEL</span><strong id="visibleModelName" class="model-name">—</strong><small>Lightweight production model</small></div>
+</section>
+<section class="panel confidence-panel accuracy-panel" aria-label="Exact/Any model accuracy and confidence">
+<div><p class="kicker">DRAW ACCURACY &amp; EVIDENCE</p><h2 id="confidenceTitle">Loading model evidence</h2><p class="subtle" id="accuracyExplanation">Accuracy means the percentage of draws where at least one of the five Exact/Any picks matched. It is not a guaranteed chance to win the next draw.</p></div>
+<div class="confidence-values">
+<div><small>HISTORICAL EXACT/ANY ACCURACY</small><strong id="confidenceBacktest">—</strong><span id="historicalCount">Held-out test · selected draw</span></div>
+<div><small>LIVE EXACT/ANY ACCURACY</small><strong id="confidenceLive">—</strong><span id="confidenceSample">Awaiting verified outcomes</span></div>
+<div><small>FAIR-DRAW BENCHMARK</small><strong id="fairBenchmark">—</strong><span>For five selected Exact/Any tickets</span></div>
+<div><small>EVIDENCE / CONFIDENCE</small><strong id="evidenceStatus">—</strong><span id="evidenceHelp">Evidence of a predictive edge, not a per-number probability</span></div>
+</div>
+</section>
+<section class="panel recent-panel" aria-label="Recent live exact/any results"><div class="section-heading"><div><p class="kicker">LIVE RESULT TRACKER</p><h2>Recent prediction outcomes</h2></div><span id="recentLiveStatus" class="chip">Checking</span></div><p class="subtle" id="recentLiveSummary">Only picks published before a draw are scored as live matches.</p><div id="recentLiveRows" class="live-rows"></div></section>
 <p class="subtle simple-note">Official results and lightweight model predictions update through GitHub Actions. The page automatically rechecks published data while open; publication may lag behind the draw. <a href="https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/download.html" target="_blank" rel="noopener noreferrer">Official draw archive ↗</a></p>
 <section hidden aria-hidden="true" id="unused-research-ui">
 <select id="strategy"><option value="model">Recommended</option></select><select id="playType"><option value="both">Exact/Any</option></select><select id="count"><option value="5">5</option></select>
