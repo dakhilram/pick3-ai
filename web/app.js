@@ -95,6 +95,15 @@ function renderLive(){
   $(el).textContent=rows.length?percent(actual/rows.length):"—";
   $(baseline).textContent=rows.length?`${actual} of ${rows.length} matches · fair expectation ${percent(fair)}`:"Waiting for live results";
  }
+ $("recentLiveStatus").textContent=rows.length?rows.length+" verified draws":"Awaiting live outcomes";
+ $("recentLiveSummary").textContent=rows.length?"Latest forward-only outcomes · "+rows.filter(r=>r.exact_any_hit).length+" Exact/Any matches across "+rows.length+" verified drawings.":"New results will appear when a forecast is verified against a later official draw.";
+ $("recentLiveRows").replaceChildren(...rows.slice(-6).reverse().map(item=>{
+  const el=document.createElement("div");el.className="live-row";
+  const name=document.createElement("span");name.textContent=item.draw_date+" · "+item.actual;
+  const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.exact_any_hit?"ANY HIT":"NO MATCH";
+  result.className=item.exact_any_hit?"match":"miss";
+  el.append(name,result);return el;
+ }));
  $("liveDetails").textContent=rows.length
   ? "Live records use the recommended model's previous top five, saved before the next draw. Other model selectors do not change this scorecard. Small samples fluctuate substantially."
   : "No eligible completed live prediction has been scored yet. The first verified outcome will appear after the next official draw is processed.";
@@ -195,6 +204,19 @@ function render(){
   $("confidenceTitle").textContent=g.exact_any_selection?"Selected for this session: "+g.exact_any_selection.model.replaceAll("_"," "):(mlSelected?"Models selected for "+mlSelected+" of 3 digit positions":"Historical frequency baseline selected");
   $("confidenceDetail").textContent="This is validation-based model selection, not a reliable winning-confidence percentage. The same 3 digits can be used for Exact, Any or Exact/Any; matching rules and ticket costs differ. FIREBALL is optional and not scored.";
   $("confidenceBacktest").textContent=g.backtest?.exact_any?.any_hit_rate!=null?percent(g.backtest.exact_any.any_hit_rate):"—";
+ $("visibleTestDraws").textContent=String(g.backtest?.exact_any?.draws??g.holdout_draws??"—");
+ $("visibleModelName").textContent=(g.exact_any_selection?.model||"smoothed_frequency").replaceAll("_"," ");
+ const accuracy=g.backtest?.exact_any;
+ $("historicalCount").textContent=accuracy?accuracy.any_matches+" hits / "+accuracy.draws+" unseen drawings":"Waiting for historical test";
+ $("fairBenchmark").textContent=accuracy?.fair_any_rate!=null?percent(accuracy.fair_any_rate):"—";
+ const liveRows=liveHistory?.games?.[name]||[];
+ const fairRate=accuracy?.fair_any_rate??0;
+ const liveRate=liveRows.length?liveRows.filter(r=>r.exact_any_hit).length/liveRows.length:null;
+ // A validation-selected model is NOT a certified higher probability of winning.
+ $("evidenceStatus").textContent=liveRows.length<100?"Unproven":"Unproven";
+ $("evidenceHelp").textContent=liveRows.length<100?"Too few forward-tested draws for dependable confidence":"No statistically established predictive edge; fair-draw benchmark remains relevant";
+ $("accuracyExplanation").textContent="Accuracy counts a hit when one of your five Exact/Any tickets matches. Exact is included in the combined hit rate; a fair draw still has random outcomes.";
+
   const selected=g.selected_models||g.validation.map(m=>m.selected);
   $("performance").textContent=selected.filter(m=>m!=="smoothed_frequency").length+" / 3";
   const freq=frequencies(g.recent),max=Math.max(1,...freq);
