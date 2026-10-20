@@ -53,6 +53,32 @@
         "exact_fair_probability": 0.005,
         "exact_any_fair_probability": 0.03,
         "box_fair_probability": 0.03
+      },
+      {
+        "draw_date": "2026-10-19",
+        "published_prediction_at": "2026-10-18T04:26:03.591827+00:00",
+        "last_known_draw": "2026-10-17",
+        "actual": "219",
+        "exact_picks": [
+          "745",
+          "374",
+          "742",
+          "748",
+          "345"
+        ],
+        "box_picks": [
+          "457",
+          "347",
+          "247",
+          "478",
+          "345"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
+        "box_fair_probability": 0.03
       }
     ],
     "morning": [
@@ -80,6 +106,32 @@
         "box_hit": false,
         "exact_fair_probability": 0.005,
         "exact_any_fair_probability": 0.021,
+        "box_fair_probability": 0.03
+      },
+      {
+        "draw_date": "2026-10-19",
+        "published_prediction_at": "2026-10-18T04:26:03.591827+00:00",
+        "last_known_draw": "2026-10-17",
+        "actual": "349",
+        "exact_picks": [
+          "205",
+          "062",
+          "204",
+          "082",
+          "302"
+        ],
+        "box_picks": [
+          "025",
+          "026",
+          "024",
+          "028",
+          "023"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
         "box_fair_probability": 0.03
       }
     ],
@@ -109,6 +161,32 @@
         "exact_fair_probability": 0.005,
         "exact_any_fair_probability": 0.03,
         "box_fair_probability": 0.03
+      },
+      {
+        "draw_date": "2026-10-19",
+        "published_prediction_at": "2026-10-18T04:26:03.591827+00:00",
+        "last_known_draw": "2026-10-17",
+        "actual": "121",
+        "exact_picks": [
+          "193",
+          "183",
+          "130",
+          "713",
+          "893"
+        ],
+        "box_picks": [
+          "139",
+          "138",
+          "013",
+          "137",
+          "389"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
+        "box_fair_probability": 0.03
       }
     ],
     "evening": [
@@ -117,6 +195,32 @@
         "published_prediction_at": "2026-10-17T21:31:44.872127+00:00",
         "last_known_draw": "2026-10-16",
         "actual": "872",
+        "exact_picks": [
+          "590",
+          "390",
+          "190",
+          "790",
+          "503"
+        ],
+        "box_picks": [
+          "059",
+          "039",
+          "019",
+          "079",
+          "035"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
+        "box_fair_probability": 0.03
+      },
+      {
+        "draw_date": "2026-10-19",
+        "published_prediction_at": "2026-10-18T04:26:03.591827+00:00",
+        "last_known_draw": "2026-10-17",
+        "actual": "703",
         "exact_picks": [
           "590",
           "390",
