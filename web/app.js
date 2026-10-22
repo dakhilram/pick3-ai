@@ -183,7 +183,14 @@ function render(){
       const exact=combinations(scores).filter(entry=>[...entry.n].sort().join("")===group.n)[0];
       return {n:exact.n,p:group.p,permutations:group.permutations};
     });
-  }else visible=(play==="box"||play==="combo"?boxCombinations(scores):combinations(scores)).slice(0,n);
+  }else visible=(play==="box"||play==="combo"?boxCombinations(validProbabilityRows(g.v2_probabilities)?g.v2_probabilities:scores):combinations(scores)).slice(0,n);
+  if(play==="box"&&Array.isArray(g.v2_top10)&&g.v2_top10.length===10){
+   const byNumber=new Map(visible.map(v=>[v.n,v]));
+   const all=boxCombinations(validProbabilityRows(g.v2_probabilities)?g.v2_probabilities:scores);
+   const lookup=new Map(all.map(v=>[v.n,v]));
+   visible=g.v2_top10.map(n=>lookup.get(n)).filter(Boolean);
+   if(visible.length!==10)throw Error("Published V2 predictions are invalid");
+  }
   $("playBadge").textContent=({box:"ANY ORDER",straight:"EXACT ORDER",both:"EXACT / ANY ORDER",combo:"COMBO · ALL EXACT ORDERS"})[play];
   $("playHelp").textContent=({straight:"Only the precise three-digit order matches. Fair-draw odds: 1 in 1,000.",box:"Any Order: all distinct permutations are grouped (1, 3 or 6).",both:"Exact/Any: use the displayed number for both Exact and Any Order on one ticket. A 50¢ base play costs $1 total; FIREBALL is extra.",combo:"Combo covers every distinct exact-order permutation of the selected digits; total ticket cost depends on 1, 3 or 6 ways."})[play]+" These are exploratory model scores, not certified odds.";
   // Present scores as relative rankings, not certified odds.
