@@ -79,10 +79,10 @@ function boxCombinations(probs){
 function percent(n){return (100*n).toFixed(2)+"%";}
 function renderLive(){
  const session=$("draw").value;
- const rows=liveHistory?.games?.[session]||[];
+ const rows=(liveHistory?.games?.[session]||[]).filter(r=>Array.isArray(r.v2_top10));
  $("liveStatus").textContent=rows.length?"COMPLETED OFFICIAL DRAWS":"NO COMPLETED TESTS YET";
  $("liveCount").textContent=String(rows.length);
- $("confidenceLive").textContent=rows.length?percent(rows.filter(r=>r.exact_any_hit).length/rows.length):"—";
+ $("confidenceLive").textContent=rows.length?percent(rows.filter(r=>r.v2_top10_hit).length/rows.length):"—";
  $("confidenceSample").textContent=rows.length?`${rows.length} verified live draws; fair rate depends on selected permutations`:"No verified live outcomes yet";
  const metrics=[
   ["exact_hit","exact_fair_probability","liveExact","liveExactBaseline"],
@@ -96,12 +96,12 @@ function renderLive(){
   $(baseline).textContent=rows.length?`${actual} of ${rows.length} matches · fair expectation ${percent(fair)}`:"Waiting for live results";
  }
  $("recentLiveStatus").textContent=rows.length?rows.length+" verified draws":"Awaiting live outcomes";
- $("recentLiveSummary").textContent=rows.length?"Latest forward-only outcomes · "+rows.filter(r=>r.exact_any_hit).length+" Exact/Any matches across "+rows.length+" verified drawings.":"New results will appear when a forecast is verified against a later official draw.";
+ $("recentLiveSummary").textContent=rows.length?"Latest forward-only Top 10 outcomes · "+rows.filter(r=>r.v2_top10_hit).length+" Any Order matches across "+rows.length+" verified drawings.":"New results will appear when a forecast is verified against a later official draw.";
  $("recentLiveRows").replaceChildren(...rows.slice(-6).reverse().map(item=>{
   const el=document.createElement("div");el.className="live-row";
   const name=document.createElement("span");name.textContent=item.draw_date+" · "+item.actual;
-  const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.exact_any_hit?"ANY HIT":"NO MATCH";
-  result.className=item.exact_any_hit?"match":"miss";
+  const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.v2_top10_hit?"ANY HIT":"NO MATCH";
+  result.className=item.v2_top10_hit?"match":"miss";
   el.append(name,result);return el;
  }));
  $("liveDetails").textContent=rows.length
@@ -110,8 +110,8 @@ function renderLive(){
  $("liveRows").replaceChildren(...rows.slice(-12).reverse().map(item=>{
   const row=document.createElement("div");row.className="live-row";
   const date=document.createElement("span");date.textContent=item.draw_date+" · "+item.actual;
-  const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.exact_any_hit?"ANY HIT":item.box_hit?"BOX HIT":"NO MATCH";
-  result.className=item.exact_hit||item.exact_any_hit||item.box_hit?"match":"miss";
+  const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.v2_top10_hit?"ANY HIT":item.box_hit?"BOX HIT":"NO MATCH";
+  result.className=item.exact_hit||item.v2_top10_hit||item.box_hit?"match":"miss";
   const picks=document.createElement("small");picks.textContent=" · Earlier top 5: "+item.exact_picks.join(", ");
   row.append(date,result,picks);return row;
  }));
@@ -170,12 +170,12 @@ async function loadLab(){
 
 function render(){
  if(!dataset)return;
- const name=$("draw").value, strategy=$("strategy").value;
+ const name=$("draw").value, strategy="model";
  const g=dataset.games[name];if(!g||!OPTIONS.has(strategy))return;
  try{
-  const scores=getScores(g,strategy),n=Number($("count").value);
+  const scores=getScores(g,strategy),n=10;
   if(!validProbabilityRows(scores)||![5,10,20,50].includes(n))throw Error("Invalid rankings");
-  const play=$("playType").value;
+  const play="box";
   if(!["straight","box","both","combo"].includes(play))throw Error("Invalid play type");
   if(play==="both"){
     const chosen=boxCombinations(scores).slice(0,n);
@@ -196,6 +196,7 @@ function render(){
   }));
   $("total").textContent=g.draws.toLocaleString();
   renderLive();
+  renderDailyHistory();
   renderLab();
   $("last").textContent=g.recent[0];
   $("lastDate").textContent=g.last_draw;
@@ -203,19 +204,19 @@ function render(){
   const mlSelected=(g.selected_models||g.validation.map(m=>m.selected)).filter(m=>m!=="smoothed_frequency").length;
   $("confidenceTitle").textContent=g.exact_any_selection?"Selected for this session: "+g.exact_any_selection.model.replaceAll("_"," "):(mlSelected?"Models selected for "+mlSelected+" of 3 digit positions":"Historical frequency baseline selected");
   $("confidenceDetail").textContent="This is validation-based model selection, not a reliable winning-confidence percentage. The same 3 digits can be used for Exact, Any or Exact/Any; matching rules and ticket costs differ. FIREBALL is optional and not scored.";
-  $("confidenceBacktest").textContent=g.backtest?.exact_any?.any_hit_rate!=null?percent(g.backtest.exact_any.any_hit_rate):"—";
- $("visibleTestDraws").textContent=String(g.backtest?.exact_any?.draws??g.holdout_draws??"—");
+  $("confidenceBacktest").textContent=g.backtest?.box?.coverage?.top_10!=null?percent(g.backtest.box.coverage.top_10):"—";
+ $("visibleTestDraws").textContent=String(g.backtest?.draws??g.holdout_draws??"—");
  $("visibleModelName").textContent=(g.exact_any_selection?.model||"smoothed_frequency").replaceAll("_"," ");
- const accuracy=g.backtest?.exact_any;
- $("historicalCount").textContent=accuracy?accuracy.any_matches+" hits / "+accuracy.draws+" unseen drawings":"Waiting for historical test";
- $("fairBenchmark").textContent=accuracy?.fair_any_rate!=null?percent(accuracy.fair_any_rate):"—";
- const liveRows=liveHistory?.games?.[name]||[];
- const fairRate=accuracy?.fair_any_rate??0;
- const liveRate=liveRows.length?liveRows.filter(r=>r.exact_any_hit).length/liveRows.length:null;
+ const accuracy=g.backtest?.box;
+ $("historicalCount").textContent=accuracy?Math.round((accuracy.coverage?.top_10||0)*(g.backtest?.draws||0))+" hits / "+(g.backtest?.draws||0)+" unseen drawings":"Waiting for historical test";
+ $("fairBenchmark").textContent=accuracy?.fair_expected_coverage?.top_10!=null?percent(accuracy.fair_expected_coverage.top_10):"—";
+ const liveRows=(liveHistory?.games?.[name]||[]).filter(r=>Array.isArray(r.v2_top10));
+ const fairRate=accuracy?.fair_expected_coverage?.top_10??0;
+ const liveRate=liveRows.length?liveRows.filter(r=>r.v2_top10_hit).length/liveRows.length:null;
  // A validation-selected model is NOT a certified higher probability of winning.
  $("evidenceStatus").textContent=liveRows.length<100?"Unproven":"Unproven";
  $("evidenceHelp").textContent=liveRows.length<100?"Too few forward-tested draws for dependable confidence":"No statistically established predictive edge; fair-draw benchmark remains relevant";
- $("accuracyExplanation").textContent="Accuracy counts a hit when one of your five Exact/Any tickets matches. Exact is included in the combined hit rate; a fair draw still has random outcomes.";
+ $("accuracyExplanation").textContent="Top 10 Any Order hit rate counts draws where at least one of ten unique unordered groups matches. Fair drawings remain independent.";
 
   const selected=g.selected_models||g.validation.map(m=>m.selected);
   $("performance").textContent=selected.filter(m=>m!=="smoothed_frequency").length+" / 3";
@@ -260,6 +261,7 @@ async function boot(announce=false){
   document.querySelector(".status").classList.add("ok");
   render();
   await loadLive();
+  renderDailyHistory();
   if(announce&&previous==dataset.generated_at&&!(dataset.official_checked_at)){$("alert").textContent="No new official dataset published since "+houstonTime(dataset.generated_at)+". Your rankings remain unchanged.";}
  }catch(error){
   if(dataset&&announce){$("alert").className="alert error";$("alert").textContent="Could not check for newer data. Your previously loaded rankings remain available.";return;}
@@ -286,3 +288,21 @@ $("refreshData").addEventListener("click",async()=>{const btn=$("refreshData");b
 boot();
 // Recheck published draws and recommendations without manual reload.
 setInterval(()=>{if(!document.hidden)boot();},5*60*1000);
+
+function renderDailyHistory(){
+ const target=$("historyDate"), host=$("dailyHistory"), metrics=$("v2Metrics");
+ if(!target||!host||!metrics)return;
+ const all=Object.entries(liveHistory?.games||{}).flatMap(([session,rows])=>(rows||[]).filter(r=>Array.isArray(r.v2_top10)).map(r=>({...r,session})));
+ if(!target.value)target.value=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+ const day=all.filter(r=>r.draw_date===target.value).sort((a,b)=>["morning","day","evening","night"].indexOf(a.session)-["morning","day","evening","night"].indexOf(b.session));
+ host.replaceChildren(...(day.length?day.map(r=>{
+  const row=document.createElement("div");row.className="live-row";
+  const desc=document.createElement("span");desc.textContent=r.session.toUpperCase()+" · "+r.actual+" · Predicted: "+r.v2_top10.join(", ");
+  const hit=document.createElement("strong");hit.textContent=r.v2_top10_hit?"HIT #"+r.v2_hit_rank:"MISS";hit.className=r.v2_top10_hit?"match":"miss";row.append(desc,hit);return row;
+ }):[Object.assign(document.createElement("p"),{textContent:"No verified V2 predictions for this date yet."})]));
+ const n=all.length,h=all.filter(r=>r.v2_top10_hit).length;
+ const top=k=>all.filter(r=>r.v2_hit_rank!=null&&r.v2_hit_rank<=k).length;
+ const fair=n?all.reduce((a,r)=>a+(r.v2_fair_probability||0),0)/n:0;
+ metrics.textContent=n?`Verified V2 draws: ${n} · Top 1: ${top(1)}/${n} · Top 5: ${top(5)}/${n} · Top 10: ${h}/${n} (${percent(h/n)}) · Fair benchmark: ${percent(fair)} · ROI: unavailable until actual wager costs and payouts are recorded.`:"Forward-only V2 tracking begins with the first verified draw after publication. ROI requires recorded wager costs and payouts.";
+}
+$("historyDate")?.addEventListener("change",renderDailyHistory);
