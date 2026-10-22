@@ -343,6 +343,51 @@
         "exact_fair_probability": 0.005,
         "exact_any_fair_probability": 0.03,
         "box_fair_probability": 0.03
+      },
+      {
+        "draw_date": "2026-10-22",
+        "published_prediction_at": "2026-10-22T16:43:43.173463+00:00",
+        "last_known_draw": "2026-10-21",
+        "actual": "790",
+        "exact_picks": [
+          "193",
+          "138",
+          "130",
+          "713",
+          "198"
+        ],
+        "box_picks": [
+          "139",
+          "138",
+          "013",
+          "137",
+          "189"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
+        "box_fair_probability": 0.03,
+        "v2_top10": [
+          "139",
+          "138",
+          "013",
+          "137",
+          "189",
+          "389",
+          "039",
+          "019",
+          "379",
+          "179"
+        ],
+        "v2_hit_rank": null,
+        "v2_top1_hit": false,
+        "v2_top5_hit": false,
+        "v2_top10_hit": false,
+        "v2_fair_probability": 0.06,
+        "v2_ticket_cost": null,
+        "v2_payout": null
       }
     ],
     "evening": [
