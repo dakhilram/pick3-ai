@@ -62,15 +62,17 @@ class Tests(unittest.TestCase):
         uniform = [[.1] * 10 for _ in range(3)]
         prev = {'generated_at': '2026-10-15T22:00:00+00:00',
                 'games': {'morning': {'last_draw': '2026-10-15',
-                                      'recent': ['123', '999'], 'probabilities': uniform}}}
+                                      'recent': ['123', '999'], 'probabilities': uniform, 'v2_top10': box_picks(uniform, 10)}}}
         current = {'games': {'morning': {'last_draw': '2026-10-16', 'recent': ['321', '123', '999']}}}
         result = reconcile(prev, current, None)
         self.assertEqual(len(result['games']['morning']), 1)
         record = result['games']['morning'][0]
         self.assertEqual(record['actual'], '321')
         self.assertEqual(record['published_prediction_at'], prev['generated_at'])
-        self.assertEqual(len(record['exact_picks']), 5)
-        self.assertEqual(len(record['box_picks']), 5)
+        self.assertEqual(len(record['exact_picks']), 10)
+        self.assertEqual(len(record['box_picks']), 10)
+        self.assertEqual(len(set(record['v2_top10'])), 10)
+        self.assertEqual(record['v2_top10_hit'], '123' in record['v2_top10'])
         self.assertEqual(len(reconcile(prev, current, result)['games']['morning']), 1)
         bad = {'games': {'morning': {'last_draw':'2026-10-18','recent':['222','888','123']}}}
         self.assertEqual(len(reconcile(prev,bad,{'games':{}}).get('games',{})),0)
