@@ -34,6 +34,8 @@ def reconcile(previous, current, history):
         old = previous['games'].get(session)
         if not old:
             continue
+        if not old.get('v2_top10'):
+            continue
         dates_differ = actual_game['last_draw'] != old['last_draw']
         if not dates_differ:
             continue
