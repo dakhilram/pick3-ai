@@ -52,3 +52,7 @@ Open http://localhost:8000. Training downloads all four official CSVs; an intern
 4. Every new training result is committed to the repository, triggering a new deployment. GitHub Actions can be delayed or paused; stale data is marked with its final draw date on the dashboard.
 
 If fetching fails, the Action fails rather than displaying fabricated data. No sample predictions are bundled intentionally.
+
+## Pick AI V2 — Any Order
+
+The dashboard displays the ten highest-ranked unique Any Order groups for each session. Lightweight official-data refreshes recalculate forecasts when new results are available, while heavier training is scheduled separately. The forward-only tracker records Top 1/5/10 hits and the exact ten groups published before a later official result. Daily history is date-selectable. ROI remains unavailable until real wager amounts and verified payouts are provided; do not infer winnings from hits. The displayed scores are not calibrated winning probabilities, and a fair drawing is independent of prior draws.
