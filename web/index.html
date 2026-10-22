@@ -5,15 +5,15 @@
 <body><div class="shell">
 <header class="top"><a href="./" class="identity" aria-label="PICK3 AI home"><span class="logo">P<span>3</span></span><span><strong>PICK3 <em>AI</em></strong><small>LIVE PICK 3 PICKS</small></span></a><div class="status"><span class="pulse"></span><span id="dataStatus">Connecting to official data</span></div></header>
 <main>
-<section class="hero compact-hero"><div><p class="kicker">TEXAS PICK 3 · AUTOMATIC UPDATES</p><h1>Your next <span>10 Any Order picks.</span></h1><p class="lead">Lightweight predictions for your five $1 Exact/Any tickets. Updated from official Texas Lottery results, with no laptop required.</p></div></section>
+<section class="hero compact-hero"><div><p class="kicker">TEXAS PICK 3 · AUTOMATIC UPDATES</p><h1>Your next <span>10 Any Order picks.</span></h1><p class="lead">Ten unique Any Order combinations for each drawing, refreshed from official Texas Lottery results.</p></div></section>
 <section class="filters panel simple-filters" aria-label="Pick3 draw controls"><div class="control"><label for="draw">DRAW SESSION</label><select id="draw"><option value="morning">Morning · 10:00 AM</option><option value="day">Day · 12:27 PM</option><option value="evening">Evening · 6:00 PM</option><option value="night">Night · 10:12 PM</option></select></div><button id="refreshData" type="button" class="secondary-button">↻ Check updates</button></section>
 <p id="nextDraw" class="next-draw" aria-live="polite">Checking next Houston drawing…</p>
 <div id="alert" class="alert" role="status">Loading official draw results…</div>
 <section class="panel ranking spacious-ranking">
-<div class="section-heading"><div><p class="kicker">YOUR NEXT PICK 3 SELECTIONS</p><h2>Five Exact/Any numbers</h2></div><span id="playBadge" class="chip">EXACT/ANY</span></div>
-<p id="playHelp" class="subtle">Each number: 50¢ Exact + 50¢ Any Order. Five tickets cost $5 total without Fireball.</p>
+<div class="section-heading"><div><p class="kicker">YOUR NEXT PICK 3 SELECTIONS</p><h2>Top 10 Any Order numbers</h2></div><span id="playBadge" class="chip">ANY ORDER</span></div>
+<p id="playHelp" class="subtle">Ten unique unordered combinations. Payouts and costs depend on the Texas Lottery wager selected.</p>
 <div id="numbers" class="numbers" aria-live="polite"><p class="empty">Loading predictions…</p></div>
-<div class="ranking-footer"><button type="button" id="copy" class="secondary">Copy five numbers</button><small>Research-based rankings, not guaranteed winning odds.</small></div>
+<div class="ranking-footer"><button type="button" id="copy" class="secondary">Copy 10 numbers</button><small>Research-based rankings, not guaranteed winning odds.</small></div>
 </section>
 <section class="stats expanded-stats" aria-label="Draw overview">
 <div class="stat panel"><span>LATEST OFFICIAL RESULT</span><strong id="last">—</strong><small id="lastDate">Checking date…</small></div>
@@ -22,18 +22,19 @@
 <div class="stat panel"><span>SELECTED MODEL</span><strong id="visibleModelName" class="model-name">—</strong><small>Lightweight production model</small></div>
 </section>
 <section class="panel confidence-panel accuracy-panel" aria-label="Exact/Any model accuracy and confidence">
-<div><p class="kicker">DRAW ACCURACY &amp; EVIDENCE</p><h2 id="confidenceTitle">Loading model evidence</h2><p class="subtle" id="accuracyExplanation">Accuracy means the percentage of draws where at least one of the five Exact/Any picks matched. It is not a guaranteed chance to win the next draw.</p></div>
+<div><p class="kicker">DRAW ACCURACY &amp; EVIDENCE</p><h2 id="confidenceTitle">Loading model evidence</h2><p class="subtle" id="accuracyExplanation">Accuracy means the percentage of draws where at least one of the ten Any Order combinations matched. It is not a guaranteed chance to win the next draw.</p></div>
 <div class="confidence-values">
-<div><small>HISTORICAL EXACT/ANY ACCURACY</small><strong id="confidenceBacktest">—</strong><span id="historicalCount">Held-out test · selected draw</span></div>
-<div><small>LIVE EXACT/ANY ACCURACY</small><strong id="confidenceLive">—</strong><span id="confidenceSample">Awaiting verified outcomes</span></div>
-<div><small>FAIR-DRAW BENCHMARK</small><strong id="fairBenchmark">—</strong><span>For five selected Exact/Any tickets</span></div>
+<div><small>HISTORICAL TOP 10 HIT RATE</small><strong id="confidenceBacktest">—</strong><span id="historicalCount">Held-out test · selected draw</span></div>
+<div><small>LIVE TOP 10 HIT RATE</small><strong id="confidenceLive">—</strong><span id="confidenceSample">Awaiting verified outcomes</span></div>
+<div><small>FAIR-DRAW BENCHMARK</small><strong id="fairBenchmark">—</strong><span>For ten Any Order combinations</span></div>
 <div><small>EVIDENCE / CONFIDENCE</small><strong id="evidenceStatus">—</strong><span id="evidenceHelp">Evidence of a predictive edge, not a per-number probability</span></div>
 </div>
 </section>
+<section class="panel recent-panel" aria-label="Daily draw history"><div class="section-heading"><div><p class="kicker">DRAW-BY-DRAW AUDIT</p><h2>Daily prediction history</h2></div><input id="historyDate" type="date" aria-label="Select drawing date"></div><div id="dailyHistory" class="live-rows"></div><div id="v2Metrics" class="subtle"></div></section>
 <section class="panel recent-panel" aria-label="Recent live exact/any results"><div class="section-heading"><div><p class="kicker">LIVE RESULT TRACKER</p><h2>Recent prediction outcomes</h2></div><span id="recentLiveStatus" class="chip">Checking</span></div><p class="subtle" id="recentLiveSummary">Only picks published before a draw are scored as live matches.</p><div id="recentLiveRows" class="live-rows"></div></section>
 <p class="subtle simple-note">Official results and lightweight model predictions update through GitHub Actions. The page automatically rechecks published data while open; publication may lag behind the draw. <a href="https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/download.html" target="_blank" rel="noopener noreferrer">Official draw archive ↗</a></p>
 <section hidden aria-hidden="true" id="unused-research-ui">
-<select id="strategy"><option value="model">Recommended</option></select><select id="playType"><option value="both">Exact/Any</option></select><select id="count"><option value="5">5</option></select>
+<select id="strategy"><option value="model">Recommended</option></select><select id="playType"><option value="box">Any Order</option></select><select id="count"><option value="10">10</option></select>
 <p id="modelExplainer"></p><p id="confidenceDetail"></p><strong id="holdout"></strong><strong id="performance"></strong><div id="bars"></div><div id="metrics"></div><p id="backtest"></p>
 <span id="liveStatus"></span><strong id="liveExact"></strong><span id="liveExactBaseline"></span><strong id="liveAny"></strong><span id="liveAnyBaseline"></span><strong id="liveBox"></strong><span id="liveBoxBaseline"></span><strong id="liveCount"></strong><p id="liveDetails"></p><div id="liveRows"></div>
 <strong id="labOverall"></strong><strong id="labSelected"></strong><strong id="labHit"></strong><span id="labHitCount"></span><strong id="labExact"></strong><span id="labExactCount"></span><div id="labModels"></div><span id="labTimestamp"></span>
