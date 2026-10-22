@@ -100,7 +100,7 @@ function renderLive(){
  $("recentLiveRows").replaceChildren(...rows.slice(-6).reverse().map(item=>{
   const el=document.createElement("div");el.className="live-row";
   const name=document.createElement("span");name.textContent=item.draw_date+" · "+item.actual;
-  const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.v2_top10_hit?"ANY HIT":"NO MATCH";
+  const result=document.createElement("strong");result.textContent=item.v2_top10_hit?"ANY HIT":"NO MATCH";
   result.className=item.v2_top10_hit?"match":"miss";
   el.append(name,result);return el;
  }));
@@ -110,9 +110,9 @@ function renderLive(){
  $("liveRows").replaceChildren(...rows.slice(-12).reverse().map(item=>{
   const row=document.createElement("div");row.className="live-row";
   const date=document.createElement("span");date.textContent=item.draw_date+" · "+item.actual;
-  const result=document.createElement("strong");result.textContent=item.exact_hit?"EXACT HIT":item.v2_top10_hit?"ANY HIT":item.box_hit?"BOX HIT":"NO MATCH";
-  result.className=item.exact_hit||item.v2_top10_hit||item.box_hit?"match":"miss";
-  const picks=document.createElement("small");picks.textContent=" · Earlier top 5: "+item.exact_picks.join(", ");
+  const result=document.createElement("strong");result.textContent=item.v2_top10_hit?"ANY HIT":"NO MATCH";
+  result.className=item.v2_top10_hit?"match":"miss";
+  const picks=document.createElement("small");picks.textContent=" · Published Top 10: "+item.v2_top10.join(", ");
   row.append(date,result,picks);return row;
  }));
 }
