@@ -34,8 +34,6 @@ def reconcile(previous, current, history):
         old = previous['games'].get(session)
         if not old:
             continue
-        if not old.get('v2_top10'):
-            continue
         dates_differ = actual_game['last_draw'] != old['last_draw']
         if not dates_differ:
             continue
@@ -50,8 +48,10 @@ def reconcile(previous, current, history):
         existing = records['games'].setdefault(session, [])
         if any(r['draw_date'] == draw_date for r in existing):
             continue
-        exact = old.get('v2_top10') or box_picks(old['probabilities'], 10)
+        exact = old.get('exact_any_picks') or ordered_picks(old['probabilities'])
         boxes = [''.join(sorted(n)) for n in exact]
+        v2 = old.get('v2_top10')
+        v2_covered = set().union(*(permutations(n) for n in v2)) if v2 else set()
         winning = actual_game['recent'][0]
         any_exact_picks = set().union(*(permutations(n) for n in exact))
         box_covered = set().union(*(permutations(n) for n in boxes))
@@ -62,14 +62,6 @@ def reconcile(previous, current, history):
             'actual': winning,
             'exact_picks': exact,
             'box_picks': boxes,
-            'v2_top10': boxes,
-            'v2_hit_rank': next((i + 1 for i, n in enumerate(boxes) if n == ''.join(sorted(winning))), None),
-            'v2_top1_hit': ''.join(sorted(winning)) in boxes[:1],
-            'v2_top5_hit': ''.join(sorted(winning)) in boxes[:5],
-            'v2_top10_hit': ''.join(sorted(winning)) in boxes,
-            'v2_fair_probability': len(box_covered) / 1000,
-            'v2_ticket_cost': None,
-            'v2_payout': None,
             'exact_hit': winning in exact,
             'exact_any_hit': winning in any_exact_picks,
             'box_hit': winning in box_covered,
@@ -77,6 +69,15 @@ def reconcile(previous, current, history):
             'exact_any_fair_probability': len(any_exact_picks)/1000,
             'box_fair_probability': len(box_covered)/1000,
         }
+        if v2:
+            canonical = ''.join(sorted(winning))
+            record.update(v2_top10=v2,
+                          v2_hit_rank=next((i + 1 for i, n in enumerate(v2) if n == canonical), None),
+                          v2_top1_hit=canonical in v2[:1],
+                          v2_top5_hit=canonical in v2[:5],
+                          v2_top10_hit=canonical in v2,
+                          v2_fair_probability=len(v2_covered) / 1000,
+                          v2_ticket_cost=None, v2_payout=None)
         # Reject forecasts published after the target draw's calendar day.
         from datetime import datetime
         try:
