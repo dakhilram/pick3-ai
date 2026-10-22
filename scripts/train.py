@@ -316,6 +316,8 @@ def predict_one(rows):
             'recent': [''.join(map(str, ds)) for _, ds in rows[-40:][::-1]],
             'probabilities': output, 'model_probabilities': alternatives, 'validation': metrics,
             'exact_any_picks': chosen_exact_any,
+            'v2_top10': [''.join(d) for d in [tuple(sorted(n)) for n in exact_any_picks(output, 10)]],
+            'v2_model': chosen_kind,
             'exact_any_selection': {'model':chosen_kind, 'validation_box_log_loss':round(validation_box_losses[chosen_kind],5),
                                     'validation_baseline_log_loss':round(validation_box_losses['smoothed_frequency'],5),
                                     'test_box_log_loss':round(box_log_loss(test_predictions,test_truth),5),
@@ -371,6 +373,7 @@ def main():
                     entry['probabilities'] = probs
                     entry['model_probabilities']['smoothed_frequency'] = probs
                     entry['exact_any_picks'] = exact_any_picks(probs)
+                    entry['v2_top10'] = [''.join(sorted(n)) for n in exact_any_picks(probs, 10)]
                     entry['forecast_refreshed_at'] = datetime.now(timezone.utc).isoformat()
         if changed:
             history_path = target.parent / 'live_history.json'
