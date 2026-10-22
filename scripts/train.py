@@ -332,6 +332,25 @@ def predict_one(rows):
                          'uniform_position_log_loss': round(float(np.log(10)), 5)}}
 
 
+def apply_shared_v2(payload):
+    """Shared lightweight frequency prior with session-specific model adjustments.
+
+    The common prior is averaged across all four sessions; each session keeps
+    75% of its own selected model probabilities and borrows 25% globally.
+    This is a heuristic forecast, not an out-of-sample validated improvement.
+    """
+    games = payload['games']
+    common = np.mean(np.asarray([games[g]['probabilities'] for g in GAMES], dtype=float), axis=0)
+    for name in GAMES:
+        entry = games[name]
+        local = np.asarray(entry['probabilities'], dtype=float)
+        shared = normalize(.75 * local + .25 * common)
+        entry['v2_probabilities'] = shared.round(9).tolist()
+        entry['v2_top10'] = [''.join(sorted(n)) for n in exact_any_picks(shared, 10)]
+        entry['v2_model'] = 'shared_prior_session_adjusted'
+        entry['v2_model_version'] = 2
+    return payload
+
 def main():
     target = ROOT / 'web' / 'data' / 'predictions.json'
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -375,11 +394,11 @@ def main():
                     entry['exact_any_picks'] = exact_any_picks(probs)
                     entry['v2_top10'] = [''.join(sorted(n)) for n in exact_any_picks(probs, 10)]
                     entry['forecast_refreshed_at'] = datetime.now(timezone.utc).isoformat()
-        for game, entry in payload['games'].items():
-            if not entry.get('v2_top10'):
-                entry['v2_top10'] = [''.join(sorted(n)) for n in exact_any_picks(entry['probabilities'], 10)]
+        if changed or any(not payload['games'][g].get('v2_probabilities') for g in GAMES):
+            apply_shared_v2(payload)
+            for entry in payload['games'].values():
                 entry['forecast_refreshed_at'] = datetime.now(timezone.utc).isoformat()
-                changed = True
+            changed = True
         if changed:
             history_path = target.parent / 'live_history.json'
             history = json.loads(history_path.read_text()) if history_path.exists() else None
@@ -395,7 +414,7 @@ def main():
             # Only skip repeated FULL training within the same Houston calendar day.
             training_day = datetime.fromisoformat(previous['generated_at']).astimezone(ZoneInfo('America/Chicago')).date()
             today = datetime.now(ZoneInfo('America/Chicago')).date()
-            if training_day == today and all(previous['games'][g].get('v2_top10') and previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
+            if training_day == today and all(previous['games'][g].get('v2_probabilities') and previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
                    and previous['games'][g]['recent'] == [
                        ''.join(map(str, digits)) for _, digits in source_rows[g][-40:][::-1]
                    ] for g in GAMES):
@@ -412,6 +431,7 @@ def main():
         payload['games'][game] = obj
         print('Trained', game, obj['last_draw'], flush=True)
 
+    apply_shared_v2(payload)
     live_path = target.parent / 'live_history.json'
     try:
         history = json.loads(live_path.read_text(encoding='utf-8')) if live_path.exists() else None
