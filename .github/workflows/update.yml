@@ -61,6 +61,8 @@ jobs:
           for label,game in data['games'].items():
               assert game['draws']>=160, label
               assert len(game['probabilities'])==3, label
+              assert len(game.get('v2_top10', []))==10, label
+              assert len(set(game['v2_top10']))==10, label
               assert all(len(d)==10 and abs(sum(d)-1)<0.0001 for d in game['probabilities']), label
           print('Validated',p,'with four draw sessions')
           PY
