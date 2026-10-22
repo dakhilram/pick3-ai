@@ -293,7 +293,7 @@ function renderDailyHistory(){
  const target=$("historyDate"), host=$("dailyHistory"), metrics=$("v2Metrics");
  if(!target||!host||!metrics)return;
  const all=Object.entries(liveHistory?.games||{}).flatMap(([session,rows])=>(rows||[]).filter(r=>Array.isArray(r.v2_top10)).map(r=>({...r,session})));
- if(!target.value)target.value=new Intl.DateTimeFormat("en-CA",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+ if(!target.value)target.value=(()=>{const parts=Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(new Date()).map(p=>[p.type,p.value]));return `${parts.year}-${parts.month}-${parts.day}`;})();
  const day=all.filter(r=>r.draw_date===target.value).sort((a,b)=>["morning","day","evening","night"].indexOf(a.session)-["morning","day","evening","night"].indexOf(b.session));
  host.replaceChildren(...(day.length?day.map(r=>{
   const row=document.createElement("div");row.className="live-row";
