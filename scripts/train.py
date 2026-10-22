@@ -375,6 +375,11 @@ def main():
                     entry['exact_any_picks'] = exact_any_picks(probs)
                     entry['v2_top10'] = [''.join(sorted(n)) for n in exact_any_picks(probs, 10)]
                     entry['forecast_refreshed_at'] = datetime.now(timezone.utc).isoformat()
+        for game, entry in payload['games'].items():
+            if not entry.get('v2_top10'):
+                entry['v2_top10'] = [''.join(sorted(n)) for n in exact_any_picks(entry['probabilities'], 10)]
+                entry['forecast_refreshed_at'] = datetime.now(timezone.utc).isoformat()
+                changed = True
         if changed:
             history_path = target.parent / 'live_history.json'
             history = json.loads(history_path.read_text()) if history_path.exists() else None
@@ -390,7 +395,7 @@ def main():
             # Only skip repeated FULL training within the same Houston calendar day.
             training_day = datetime.fromisoformat(previous['generated_at']).astimezone(ZoneInfo('America/Chicago')).date()
             today = datetime.now(ZoneInfo('America/Chicago')).date()
-            if training_day == today and all(previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
+            if training_day == today and all(previous['games'][g].get('v2_top10') and previous['games'][g]['last_draw'] == source_rows[g][-1][0].date().isoformat()
                    and previous['games'][g]['recent'] == [
                        ''.join(map(str, digits)) for _, digits in source_rows[g][-40:][::-1]
                    ] for g in GAMES):
