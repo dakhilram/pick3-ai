@@ -69,8 +69,8 @@ class Tests(unittest.TestCase):
         record = result['games']['morning'][0]
         self.assertEqual(record['actual'], '321')
         self.assertEqual(record['published_prediction_at'], prev['generated_at'])
-        self.assertEqual(len(record['exact_picks']), 10)
-        self.assertEqual(len(record['box_picks']), 10)
+        self.assertEqual(len(record['exact_picks']), 5)
+        self.assertEqual(len(record['box_picks']), 5)
         self.assertEqual(len(set(record['v2_top10'])), 10)
         self.assertEqual(record['v2_top10_hit'], '123' in record['v2_top10'])
         self.assertEqual(len(reconcile(prev, current, result)['games']['morning']), 1)
