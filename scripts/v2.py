@@ -106,9 +106,9 @@ def score(predictions, actual):
     masses = [pick.get('model_probability') for pick in predictions]
     return {'hit_rank': hit,
             'exact_hit': any(pick.get('representative') == actual for pick in predictions),
-            'fair_top_1': predictions[0]['fair_probability'],
-            'fair_top_5': sum(pick['fair_probability'] for pick in predictions[:5]),
-            'fair_coverage': sum(pick['fair_probability'] for pick in predictions),
+            'fair_top_1': round(predictions[0]['fair_probability'], 6),
+            'fair_top_5': round(sum(pick['fair_probability'] for pick in predictions[:5]), 6),
+            'fair_coverage': round(sum(pick['fair_probability'] for pick in predictions), 6),
             'estimated_coverage': round(sum(masses), 6) if all(m is not None for m in masses) else None}
 
 

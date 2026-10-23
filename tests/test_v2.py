@@ -56,7 +56,7 @@ class V2Tests(unittest.TestCase):
         self.assertEqual(record['published_at'], first['generated_at'])
         self.assertEqual(record['predictions'], first['forecasts'][0]['predictions'])
         self.assertIsNotNone(record['estimated_coverage'])
-        self.assertEqual(record['fair_coverage'], .06)
+        self.assertAlmostEqual(record['fair_coverage'], .06)
         again, changed = update(morning_only, second, now=later)
         self.assertFalse(changed)
         self.assertEqual(again, second)
