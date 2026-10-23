@@ -1,43 +1,21 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#080f1c"><meta name="description" content="Texas Pick 3 historical patterns, machine learning comparisons, and transparent holdout testing.">
-<title>PICK3 AI | Texas Pick 3 Research</title><link rel="icon" type="image/svg+xml" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg"><link rel="manifest" href="manifest.webmanifest"><meta name="application-name" content="PICK3 AI"><link rel="stylesheet" href="styles.css"></head>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a1220">
+  <meta name="description" content="Forward tested Texas Pick 3 research forecasts and verified official results.">
+  <title>Pick3 AI V2 | Texas Pick 3</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css"><script src="app.js" defer></script>
+</head>
 <body><div class="shell">
-<header class="top"><a href="./" class="identity" aria-label="PICK3 AI home"><span class="logo">P<span>3</span></span><span><strong>PICK3 <em>AI</em></strong><small>LIVE PICK 3 PICKS</small></span></a><div class="status"><span class="pulse"></span><span id="dataStatus">Connecting to official data</span></div></header>
-<main>
-<section class="hero compact-hero"><div><p class="kicker">TEXAS PICK 3 · AUTOMATIC UPDATES</p><h1>Your next <span>10 Any Order picks.</span></h1><p class="lead">Ten unique Any Order combinations for each drawing, refreshed from official Texas Lottery results.</p></div></section>
-<section class="filters panel simple-filters" aria-label="Pick3 draw controls"><div class="control"><label for="draw">DRAW SESSION</label><select id="draw"><option value="morning">Morning · 10:00 AM</option><option value="day">Day · 12:27 PM</option><option value="evening">Evening · 6:00 PM</option><option value="night">Night · 10:12 PM</option></select></div><button id="refreshData" type="button" class="secondary-button">↻ Check updates</button></section>
-<p id="nextDraw" class="next-draw" aria-live="polite">Checking next Houston drawing…</p>
-<div id="alert" class="alert" role="status">Loading official draw results…</div>
-<section class="panel ranking spacious-ranking">
-<div class="section-heading"><div><p class="kicker">YOUR NEXT PICK 3 SELECTIONS</p><h2>Top 10 Any Order numbers</h2></div><span id="playBadge" class="chip">ANY ORDER</span></div>
-<p id="playHelp" class="subtle">Ten unique unordered combinations. Payouts and costs depend on the Texas Lottery wager selected.</p>
-<div id="numbers" class="numbers" aria-live="polite"><p class="empty">Loading predictions…</p></div>
-<div class="ranking-footer"><button type="button" id="copy" class="secondary">Copy 10 numbers</button><small>Research-based rankings, not guaranteed winning odds.</small></div>
-</section>
-<section class="stats expanded-stats" aria-label="Draw overview">
-<div class="stat panel"><span>LATEST OFFICIAL RESULT</span><strong id="last">—</strong><small id="lastDate">Checking date…</small></div>
-<div class="stat panel"><span>DRAWS ANALYZED</span><strong id="total">—</strong><small>For selected session</small></div>
-<div class="stat panel"><span>TEST DRAWINGS</span><strong id="visibleTestDraws">—</strong><small>Historically held out</small></div>
-<div class="stat panel"><span>SELECTED MODEL</span><strong id="visibleModelName" class="model-name">—</strong><small>Lightweight production model</small></div>
-</section>
-<section class="panel confidence-panel accuracy-panel" aria-label="Exact/Any model accuracy and confidence">
-<div><p class="kicker">DRAW ACCURACY &amp; EVIDENCE</p><h2 id="confidenceTitle">Loading model evidence</h2><p class="subtle" id="accuracyExplanation">Accuracy means the percentage of draws where at least one of the ten Any Order combinations matched. It is not a guaranteed chance to win the next draw.</p></div>
-<div class="confidence-values">
-<div><small>HISTORICAL TOP 10 HIT RATE</small><strong id="confidenceBacktest">—</strong><span id="historicalCount">Held-out test · selected draw</span></div>
-<div><small>LIVE TOP 10 HIT RATE</small><strong id="confidenceLive">—</strong><span id="confidenceSample">Awaiting verified outcomes</span></div>
-<div><small>FAIR-DRAW BENCHMARK</small><strong id="fairBenchmark">—</strong><span>For ten Any Order combinations</span></div>
-<div><small>EVIDENCE / CONFIDENCE</small><strong id="evidenceStatus">—</strong><span id="evidenceHelp">Evidence of a predictive edge, not a per-number probability</span></div>
-</div>
-</section>
-<section class="panel recent-panel" aria-label="Daily draw history"><div class="section-heading"><div><p class="kicker">DRAW-BY-DRAW AUDIT</p><h2>Daily prediction history</h2></div><input id="historyDate" type="date" aria-label="Select drawing date"></div><div id="dailyHistory" class="live-rows"></div><div id="v2Metrics" class="subtle"></div></section>
-<section class="panel recent-panel" aria-label="Recent live exact/any results"><div class="section-heading"><div><p class="kicker">LIVE RESULT TRACKER</p><h2>Recent prediction outcomes</h2></div><span id="recentLiveStatus" class="chip">Checking</span></div><p class="subtle" id="recentLiveSummary">Only picks published before a draw are scored as live matches.</p><div id="recentLiveRows" class="live-rows"></div></section>
-<p class="subtle simple-note">Official results and lightweight model predictions update through GitHub Actions. The page automatically rechecks published data while open; publication may lag behind the draw. <a href="https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/download.html" target="_blank" rel="noopener noreferrer">Official draw archive ↗</a></p>
-<section hidden aria-hidden="true" id="unused-research-ui">
-<select id="strategy"><option value="model">Recommended</option></select><select id="playType"><option value="box">Any Order</option></select><select id="count"><option value="10">10</option></select>
-<p id="modelExplainer"></p><p id="confidenceDetail"></p><strong id="holdout"></strong><strong id="performance"></strong><div id="bars"></div><div id="metrics"></div><p id="backtest"></p>
-<span id="liveStatus"></span><strong id="liveExact"></strong><span id="liveExactBaseline"></span><strong id="liveAny"></strong><span id="liveAnyBaseline"></span><strong id="liveBox"></strong><span id="liveBoxBaseline"></span><strong id="liveCount"></strong><p id="liveDetails"></p><div id="liveRows"></div>
-<strong id="labOverall"></strong><strong id="labSelected"></strong><strong id="labHit"></strong><span id="labHitCount"></span><strong id="labExact"></strong><span id="labExactCount"></span><div id="labModels"></div><span id="labTimestamp"></span>
-</section>
-</main><footer>FIREBALL is an optional paid add-on and is not included in these predictions. Independent research project; not affiliated with the Texas Lottery. 18+ to play. No model has proven an advantage over fair independent drawings. <a href="https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/download.html" target="_blank" rel="noopener noreferrer">Official historical data ↗</a></footer>
-</div><script src="app.js" defer></script></body></html>
+  <header><a class="brand" href="./"><span class="mark">P3</span><span>Pick3 <b>AI V2</b><small>Texas draw research</small></span></a><span id="status" role="status">Checking official data…</span></header>
+  <main>
+    <section class="intro"><p class="eyebrow">FOUR DAILY SESSIONS · MONDAY–SATURDAY</p><h1>Next draw, ten distinct combinations.</h1><p>One shared lightweight outcome model ranks all 1,000 ordered results, then sums distinct permutations for Any Order. Draws are independent; no predictive advantage is established.</p></section>
+    <section class="panel featured" aria-labelledby="nextTitle"><div class="heading"><div><p class="eyebrow">NEXT SCHEDULED DRAW</p><h2 id="nextTitle">Checking schedule…</h2><p id="nextMeta" class="muted"></p></div><label class="date-control">View as <select id="viewMode"><option value="any">Any Order</option><option value="exact">Exact Order</option><option value="exact_any">Exact/Any</option><option value="combo">Combo</option></select></label></div><div id="topPicks" class="pick-grid"></div><p class="footnote">The same ten outcome groups are used in every view. Model estimates are exploratory and uncalibrated. Any Order and Combo cover each group's distinct permutations.</p></section>
+    <section class="panel" aria-labelledby="sessionsTitle"><div class="heading"><div><p class="eyebrow">CURRENT FORECASTS</p><h2 id="sessionsTitle">All four sessions</h2></div></div><div id="sessions" class="sessions"></div></section>
+    <section class="panel" aria-labelledby="historyTitle"><div class="heading"><div><p class="eyebrow">IMMUTABLE PUBLISHED SNAPSHOTS</p><h2 id="historyTitle">Draw history</h2></div><label class="date-control">Drawing date <input id="historyDate" type="date"></label></div><div id="history" class="history"></div></section>
+    <section class="panel" aria-labelledby="evidenceTitle"><div class="heading"><div><p class="eyebrow">EVIDENCE</p><h2 id="evidenceTitle">Accuracy and calibration</h2></div></div><p class="muted">Historical rates use walk-forward forecasts made from earlier results. Forward rates use only snapshots published before the actual draw. Model estimates and observed hit rates are shown separately.</p><div id="metrics" class="metrics"></div><p id="calibration" class="footnote"></p></section>
+  </main>
+  <footer>Official results: <a href="https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/download.html">Texas Lottery Pick 3 archive</a>. FIREBALL is outside this model. Independent research, not affiliated with the Texas Lottery. <span id="updated"></span></footer>
+</div></body></html>

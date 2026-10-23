@@ -1,3 +1,4 @@
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -139,6 +140,8 @@ if __name__ == '__main__':
     unittest.main()
 
 
+@unittest.skipUnless(os.environ.get('PICK3_RUN_OFFLINE_LAB_TESTS') == '1',
+                     'Separate laptop lab is not part of the lightweight test run')
 class OfflineLabTests(unittest.TestCase):
     def test_laptop_baselines_and_ticket_scoring(self):
         from offline_lab import fit_predict, CANDIDATES

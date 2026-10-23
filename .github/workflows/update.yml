@@ -1,79 +1,78 @@
-name: Update official draws and evaluate models
+name: Verify official draws and publish Pick3 AI V2
 on:
   push:
     branches: [main]
     paths:
-      - 'scripts/**'
-      - 'tests/**'
-      - 'requirements.txt'
+      - 'scripts/v2.py'
+      - 'scripts/schedule_gate.py'
+      - 'tests/test_v2.py'
       - '.github/workflows/update.yml'
   workflow_dispatch:
   schedule:
-    # UTC triggers cover BOTH CDT and CST; timezone gate below executes
-    # precisely two post-draw checks for each of four Houston sessions.
-    - cron: '35 0,15,16,23 * * *'
-    - cron: '15 0,1,16,17 * * *'
-    - cron: '5 18,19 * * *'
-    - cron: '45 3,4,18,19 * * *'
-    - cron: '25 4,5 * * *'
+    # First checks: 10:06, 12:33, 18:06, 22:18 Central, in both CDT and CST.
+    # Later checks catch official publication and delayed Actions runners.
+    - cron: '6,26,56 15,16 * * *'
+    - cron: '33,53 17,18 * * *'
+    - cron: '13 18,19 * * *'
+    - cron: '6,26,56 23,0 * * *'
+    - cron: '18,38,58 3,4 * * *'
+    - cron: '18 5 * * *'
 permissions:
   contents: write
+  pages: write
+  id-token: write
 concurrency:
-  group: pick3-data-refresh
+  group: pages
   cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: pip
-      - name: Check Houston post-draw window
-        id: gate
-        env:
-          GITHUB_EVENT_NAME: ${{ github.event_name }}
-        run: python scripts/schedule_gate.py
-      - name: Install dependencies
-        if: steps.gate.outputs.run == 'true'
-        run: pip install -r requirements.txt
-      - name: Run unit tests
-        if: steps.gate.outputs.run == 'true'
-        run: python -m unittest discover -s tests -v
-      - name: Check official draws or train daily models
-        if: steps.gate.outputs.run == 'true'
-        env:
-          PICK3_TRAIN_MODE: ${{ steps.gate.outputs.train == 'true' && 'train' || 'refresh' }}
-        run: python scripts/train.py
-      - name: Validate generated dataset
-        if: steps.gate.outputs.run == 'true'
+      - name: Test lightweight model and schedule
+        run: python -m unittest discover -s tests -p test_v2.py -v
+      - name: Check official archives and publish snapshots
+        run: python scripts/v2.py
+      - name: Validate JSON and browser script
         run: |
+          python -m json.tool web/data/predictions.json > /dev/null
+          node --check web/app.js
           python - <<'PY'
           import json
           from pathlib import Path
-          p=Path('web/data/predictions.json')
-          assert p.is_file(), 'Training produced no web/data/predictions.json'
-          data=json.loads(p.read_text())
-          assert set(data['games'])=={'morning','day','evening','night'}
-          history=json.loads(Path('web/data/live_history.json').read_text())
-          assert set(history.get('games', {})).issubset(data['games'])
-          for label,game in data['games'].items():
-              assert game['draws']>=160, label
-              assert len(game['probabilities'])==3, label
-              assert len(game.get('v2_top10', []))==10, label
-              assert len(set(game['v2_top10']))==10, label
-              assert all(len(d)==10 and abs(sum(d)-1)<0.0001 for d in game['probabilities']), label
-          print('Validated',p,'with four draw sessions')
+          data=json.loads(Path('web/data/predictions.json').read_text())
+          assert data['schema_version']==9
+          assert set(data['sessions'])=={'morning','day','evening','night'}
+          for item in data['sessions'].values():
+              picks=item['predictions']
+              assert len(picks)==10 and len({p['group'] for p in picks})==10
+              assert all(len(p['group'])==3 and ''.join(sorted(p['group']))==p['group'] for p in picks)
           PY
-      - name: Commit new model output
-        if: steps.gate.outputs.run == 'true'
+      - name: Commit verified data
+        id: commit
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add -f web/data/predictions.json web/data/live_history.json
+          git add web/data/predictions.json
           if ! git diff --cached --quiet; then
-            git commit -m 'Update official Texas Pick 3 model outputs'
+            git commit -m 'Publish verified Pick3 AI V2 forecasts'
             git pull --rebase origin main
             git push origin HEAD:main
+            echo 'changed=true' >> "$GITHUB_OUTPUT"
           fi
+      # Commits made with GITHUB_TOKEN do not trigger pages.yml.
+      - uses: actions/configure-pages@v5
+        if: steps.commit.outputs.changed == 'true'
+      - uses: actions/upload-pages-artifact@v3
+        if: steps.commit.outputs.changed == 'true'
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4
+        if: steps.commit.outputs.changed == 'true'
