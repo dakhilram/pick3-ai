@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from schedule_gate import CENTRAL, next_draw, scheduled_at
 from v2 import parse, events, rank, score, update, summarize, save_atomic, forward_metrics
+from package_site import ASSETS, package
 
 
 class V2Tests(unittest.TestCase):
@@ -101,6 +102,13 @@ class V2Tests(unittest.TestCase):
             save_atomic(path, {'schema_version': 9, 'sessions': {}})
             self.assertEqual(json.loads(path.read_text())['schema_version'], 9)
             self.assertEqual(list(Path(directory).glob('*.tmp')), [])
+
+    def test_pages_package_contains_only_active_v2_assets(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = package(Path(directory) / 'site')
+            files = {p.relative_to(output).as_posix() for p in output.rglob('*') if p.is_file()}
+            self.assertEqual(files, set(ASSETS))
+            self.assertEqual(json.loads((output / 'data/predictions.json').read_text())['schema_version'], 9)
 
 
 if __name__ == '__main__':

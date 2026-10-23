@@ -1,0 +1,8 @@
+# Local interpreter and editor output; keep laptop lab files out of commits.
+__pycache__/
+*.py[cod]
+.venv/
+reports/
+
+# Local site preview output.
+site-dist/

@@ -10,7 +10,7 @@ Draws are scheduled Monday–Saturday at 10:00 a.m., 12:27 p.m., 6:00 p.m., and 
 
 Model probabilities are uncalibrated estimates. Fair-random benchmarks count the distinct ordered outcomes covered by each Any Order group. Historical walk-forward testing and actual published forward testing are labeled separately. No predictive advantage over fair independent draws is claimed.
 
-The legacy `scripts/train.py` and `scripts/live_tracker.py` are outside the production workflow. The optional laptop training and calibration backend is separate and is not called by the V2 updater or dashboard.
+The legacy `scripts/train.py` and `scripts/live_tracker.py` remain in the repository because older tests and the separate laptop backend may still depend on them. Neither is called by the V2 updater or dashboard. `scripts/package_site.py` publishes only active V2 assets and `predictions.json`; older data files remain in the repository as archives and are excluded from the deployed site.
 
 ## Verify locally
 

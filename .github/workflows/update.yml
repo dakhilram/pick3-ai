@@ -35,6 +35,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Install IANA time-zone data
+        run: python -m pip install 'tzdata>=2025.2'
       - name: Test lightweight model and schedule
         run: python -m unittest discover -s tests -p test_v2.py -v
       - name: Check official archives and publish snapshots
@@ -69,10 +71,13 @@ jobs:
       # Commits made with GITHUB_TOKEN do not trigger pages.yml.
       - uses: actions/configure-pages@v5
         if: steps.commit.outputs.changed == 'true'
+      - name: Package V2 dashboard
+        if: steps.commit.outputs.changed == 'true'
+        run: python scripts/package_site.py
       - uses: actions/upload-pages-artifact@v3
         if: steps.commit.outputs.changed == 'true'
         with:
-          path: web
+          path: site-dist
       - id: deployment
         uses: actions/deploy-pages@v4
         if: steps.commit.outputs.changed == 'true'
