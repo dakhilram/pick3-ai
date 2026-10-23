@@ -131,6 +131,51 @@
         "exact_fair_probability": 0.005,
         "exact_any_fair_probability": 0.03,
         "box_fair_probability": 0.03
+      },
+      {
+        "draw_date": "2026-10-22",
+        "published_prediction_at": "2026-10-22T18:31:10.269700+00:00",
+        "last_known_draw": "2026-10-21",
+        "actual": "303",
+        "exact_picks": [
+          "742",
+          "745",
+          "374",
+          "748",
+          "741"
+        ],
+        "box_picks": [
+          "247",
+          "457",
+          "347",
+          "478",
+          "147"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
+        "box_fair_probability": 0.03,
+        "v2_top10": [
+          "247",
+          "457",
+          "347",
+          "478",
+          "147",
+          "245",
+          "234",
+          "345",
+          "348",
+          "248"
+        ],
+        "v2_hit_rank": null,
+        "v2_top1_hit": false,
+        "v2_top5_hit": false,
+        "v2_top10_hit": false,
+        "v2_fair_probability": 0.06,
+        "v2_ticket_cost": null,
+        "v2_payout": null
       }
     ],
     "morning": [
@@ -494,6 +539,51 @@
         "exact_fair_probability": 0.005,
         "exact_any_fair_probability": 0.03,
         "box_fair_probability": 0.03
+      },
+      {
+        "draw_date": "2026-10-22",
+        "published_prediction_at": "2026-10-22T18:31:10.269700+00:00",
+        "last_known_draw": "2026-10-21",
+        "actual": "883",
+        "exact_picks": [
+          "590",
+          "903",
+          "503",
+          "790",
+          "190"
+        ],
+        "box_picks": [
+          "059",
+          "039",
+          "035",
+          "079",
+          "019"
+        ],
+        "exact_hit": false,
+        "exact_any_hit": false,
+        "box_hit": false,
+        "exact_fair_probability": 0.005,
+        "exact_any_fair_probability": 0.03,
+        "box_fair_probability": 0.03,
+        "v2_top10": [
+          "059",
+          "039",
+          "035",
+          "079",
+          "019",
+          "359",
+          "057",
+          "015",
+          "013",
+          "037"
+        ],
+        "v2_hit_rank": null,
+        "v2_top1_hit": false,
+        "v2_top5_hit": false,
+        "v2_top10_hit": false,
+        "v2_fair_probability": 0.06,
+        "v2_ticket_cost": null,
+        "v2_payout": null
       }
     ]
   }
