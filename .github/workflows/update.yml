@@ -55,6 +55,7 @@ jobs:
         run: |
           python -m json.tool web/data/predictions.json > /dev/null
           node --check web/app.js
+          node --test tests/dashboard.test.js
           python - <<'PY'
           import json
           from pathlib import Path

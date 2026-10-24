@@ -1,21 +1,85 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0a1220">
-  <meta name="description" content="Forward tested Texas Pick 3 research forecasts and verified official results.">
+  <meta name="description" content="Texas Pick 3 number forecasts, published snapshots, and verified results.">
   <title>Pick3 AI V2 | Texas Pick 3</title>
-  <link rel="icon" href="icon.svg" type="image/svg+xml"><link rel="manifest" href="manifest.webmanifest">
-  <link rel="stylesheet" href="styles.css"><script src="app.js" defer></script>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="styles.css">
+  <script src="app.js" defer></script>
 </head>
-<body><div class="shell">
-  <header><a class="brand" href="./"><span class="mark">P3</span><span>Pick3 <b>AI V2</b><small>Texas draw research</small></span></a><span id="status" role="status">Checking official data…</span></header>
-  <main>
-    <section class="intro"><p class="eyebrow">FOUR DAILY SESSIONS · MONDAY–SATURDAY</p><h1>Next draw, ten distinct combinations.</h1><p>One shared lightweight outcome model ranks all 1,000 ordered results, then sums distinct permutations for Any Order. Draws are independent; no predictive advantage is established.</p></section>
-    <section class="panel featured" aria-labelledby="nextTitle"><div class="heading"><div><p class="eyebrow">NEXT SCHEDULED DRAW</p><h2 id="nextTitle">Checking schedule…</h2><p id="nextMeta" class="muted"></p></div><label class="date-control">View as <select id="viewMode"><option value="any">Any Order</option><option value="exact">Exact Order</option><option value="exact_any">Exact/Any</option><option value="combo">Combo</option></select></label></div><div id="topPicks" class="pick-grid"></div><p class="footnote">The same ten outcome groups are used in every view. Model estimates are exploratory and uncalibrated. Any Order and Combo cover each group's distinct permutations.</p></section>
-    <section class="panel" aria-labelledby="sessionsTitle"><div class="heading"><div><p class="eyebrow">CURRENT FORECASTS</p><h2 id="sessionsTitle">All four sessions</h2></div></div><div id="sessions" class="sessions"></div></section>
-    <section class="panel" aria-labelledby="historyTitle"><div class="heading"><div><p class="eyebrow">IMMUTABLE PUBLISHED SNAPSHOTS</p><h2 id="historyTitle">Draw history</h2></div><label class="date-control">Drawing date <input id="historyDate" type="date"></label></div><div id="history" class="history"></div></section>
-    <section class="panel" aria-labelledby="evidenceTitle"><div class="heading"><div><p class="eyebrow">EVIDENCE</p><h2 id="evidenceTitle">Accuracy and calibration</h2></div></div><p class="muted">Historical rates use walk-forward forecasts made from earlier results. Forward rates use only snapshots published before the actual draw. Model estimates and observed hit rates are shown separately.</p><div id="metrics" class="metrics"></div><p id="calibration" class="footnote"></p></section>
-  </main>
-  <footer>Official results: <a href="https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/download.html">Texas Lottery Pick 3 archive</a>. FIREBALL is outside this model. Independent research, not affiliated with the Texas Lottery. <span id="updated"></span></footer>
-</div></body></html>
+<body>
+  <div class="shell">
+    <header>
+      <a class="brand" href="./"><span class="mark">P3</span><span>Pick3 <b>AI V2</b><small>Texas draw research</small></span></a>
+      <span id="status" role="status">Checking official data…</span>
+    </header>
+    <main>
+      <section class="intro">
+        <p class="eyebrow">FOUR DAILY SESSIONS · MONDAY–SATURDAY</p>
+        <h1>Ten numbers for the next draw.</h1>
+        <p>The model ranks three-digit outcomes and groups numbers with the same digits. Digits are shown in sorted order for consistency; the rank applies to the combination.</p>
+        <div class="summary-strip">
+          <p><span>Last verified official result</span><strong id="latestResult">Checking…</strong></p>
+          <p><span>Predictions generated</span><strong id="generatedAt">Checking…</strong></p>
+        </div>
+      </section>
+
+      <section class="panel featured" aria-labelledby="nextTitle">
+        <div class="heading">
+          <div>
+            <p class="eyebrow">NEXT SCHEDULED DRAW</p>
+            <h2 id="nextTitle">Checking schedule…</h2>
+            <p id="nextMeta" class="muted"></p>
+          </div>
+          <label class="session-control">Show predictions for
+            <select id="sessionSelect" aria-label="Prediction session">
+              <option value="morning">Morning</option>
+              <option value="day">Day</option>
+              <option value="evening">Evening</option>
+              <option value="night">Night</option>
+            </select>
+          </label>
+        </div>
+        <div class="forecast-bar">
+          <div>
+            <h3 id="forecastTitle">Top 10 predictions</h3>
+            <p id="forecastMeta" class="muted"></p>
+          </div>
+          <div class="forecast-actions">
+            <span id="freshness" class="freshness" aria-live="polite"></span>
+            <button id="copyAll" class="primary-button" type="button">Copy All 10</button>
+          </div>
+        </div>
+        <div id="topPicks" class="pick-grid"></div>
+        <p id="copyFeedback" class="copy-feedback" role="status" aria-live="polite"></p>
+        <p class="footnote">Percentages are model estimates for each digit combination, not observed hit rates. Historical accuracy appears below.</p>
+      </section>
+
+      <section class="panel" aria-labelledby="sessionsTitle">
+        <div class="heading"><div><p class="eyebrow">CURRENT FORECASTS</p><h2 id="sessionsTitle">All four sessions</h2></div></div>
+        <div id="sessions" class="sessions"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="historyTitle">
+        <div class="heading">
+          <div><p class="eyebrow">PUBLISHED SNAPSHOTS</p><h2 id="historyTitle">Draw history</h2></div>
+          <label class="date-control">Drawing date <input id="historyDate" type="date"></label>
+        </div>
+        <div id="history" class="history"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="evidenceTitle">
+        <div class="heading"><div><p class="eyebrow">EVIDENCE</p><h2 id="evidenceTitle">Historical accuracy</h2></div></div>
+        <p class="muted">Observed Top 1, Top 5, and Top 10 hit rates are measured across scored draws. Fair-random benchmarks account for the distinct digit arrangements in each combination.</p>
+        <div id="metrics" class="metrics"></div>
+        <p id="calibration" class="footnote"></p>
+      </section>
+    </main>
+    <footer>Official results: <a href="https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/download.html">Texas Lottery Pick 3 archive</a>. FIREBALL is outside this model. Independent research, not affiliated with the Texas Lottery.</footer>
+  </div>
+</body>
+</html>

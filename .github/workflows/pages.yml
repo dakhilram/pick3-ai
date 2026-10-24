@@ -21,6 +21,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Test dashboard
+        run: |
+          node --check web/app.js
+          node --test tests/dashboard.test.js
+          python -m json.tool web/data/predictions.json > /dev/null
       - name: Package V2 dashboard
         run: python scripts/package_site.py
       - uses: actions/configure-pages@v5
