@@ -1,13 +1,13 @@
 {
   "schema_version": 9,
-  "generated_at": "2026-11-14T03:02:20.379371+00:00",
+  "generated_at": "2026-11-14T10:39:13.211046+00:00",
   "source": "https://www.texaslottery.com/export/sites/lottery/Games/Pick_3/Winning_Numbers/",
   "model": "shared_frequency_v2",
   "processed": {
     "morning": "2026-11-13",
     "day": "2026-11-13",
     "evening": "2026-11-13",
-    "night": "2026-11-12"
+    "night": "2026-11-13"
   },
   "sessions": {
     "morning": {
@@ -31,6 +31,13 @@
           "fair_probability": 0.006
         },
         {
+          "group": "034",
+          "representative": "430",
+          "model_probability": 0.007207161,
+          "exact_probability": 0.002054956,
+          "fair_probability": 0.006
+        },
+        {
           "group": "459",
           "representative": "495",
           "model_probability": 0.007193852,
@@ -38,17 +45,10 @@
           "fair_probability": 0.006
         },
         {
-          "group": "034",
-          "representative": "430",
-          "model_probability": 0.00712822,
-          "exact_probability": 0.002012144,
-          "fair_probability": 0.006
-        },
-        {
-          "group": "249",
-          "representative": "492",
-          "model_probability": 0.007092134,
-          "exact_probability": 0.001781855,
+          "group": "049",
+          "representative": "490",
+          "model_probability": 0.007083432,
+          "exact_probability": 0.002540467,
           "fair_probability": 0.006
         },
         {
@@ -67,16 +67,16 @@
         },
         {
           "group": "149",
-          "representative": "491",
-          "model_probability": 0.007049998,
-          "exact_probability": 0.001721872,
+          "representative": "419",
+          "model_probability": 0.007049196,
+          "exact_probability": 0.001729295,
           "fair_probability": 0.006
         },
         {
-          "group": "049",
-          "representative": "490",
-          "model_probability": 0.007011712,
-          "exact_probability": 0.002487541,
+          "group": "249",
+          "representative": "492",
+          "model_probability": 0.007026533,
+          "exact_probability": 0.001781855,
           "fair_probability": 0.006
         },
         {
@@ -87,7 +87,7 @@
           "fair_probability": 0.006
         }
       ],
-      "published_at": "2026-11-14T03:02:20.379371+00:00"
+      "published_at": "2026-11-14T10:39:13.211046+00:00"
     },
     "day": {
       "last_draw": "2026-11-13",
@@ -98,29 +98,29 @@
         {
           "group": "239",
           "representative": "329",
-          "model_probability": 0.007567761,
-          "exact_probability": 0.001863072,
+          "model_probability": 0.007506516,
+          "exact_probability": 0.001819745,
           "fair_probability": 0.006
         },
         {
           "group": "249",
           "representative": "429",
-          "model_probability": 0.007560024,
-          "exact_probability": 0.001941165,
+          "model_probability": 0.007493495,
+          "exact_probability": 0.001896022,
           "fair_probability": 0.006
         },
         {
           "group": "234",
           "representative": "324",
-          "model_probability": 0.00737166,
-          "exact_probability": 0.001587289,
+          "model_probability": 0.007302523,
+          "exact_probability": 0.001550375,
           "fair_probability": 0.006
         },
         {
           "group": "235",
           "representative": "325",
-          "model_probability": 0.007326926,
-          "exact_probability": 0.001777273,
+          "model_probability": 0.007261611,
+          "exact_probability": 0.001735941,
           "fair_probability": 0.006
         },
         {
@@ -133,40 +133,40 @@
         {
           "group": "245",
           "representative": "425",
-          "model_probability": 0.007247011,
-          "exact_probability": 0.001851769,
+          "model_probability": 0.007175322,
+          "exact_probability": 0.001808705,
           "fair_probability": 0.006
         },
         {
           "group": "238",
           "representative": "328",
-          "model_probability": 0.007246022,
-          "exact_probability": 0.001654702,
+          "model_probability": 0.007168182,
+          "exact_probability": 0.001571326,
           "fair_probability": 0.006
         },
         {
           "group": "259",
           "representative": "295",
-          "model_probability": 0.007209251,
+          "model_probability": 0.007151708,
           "exact_probability": 0.001460931,
-          "fair_probability": 0.006
-        },
-        {
-          "group": "248",
-          "representative": "428",
-          "model_probability": 0.007192231,
-          "exact_probability": 0.001724061,
           "fair_probability": 0.006
         },
         {
           "group": "289",
           "representative": "829",
-          "model_probability": 0.007157965,
-          "exact_probability": 0.001455874,
+          "model_probability": 0.007117302,
+          "exact_probability": 0.001462879,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "359",
+          "representative": "395",
+          "model_probability": 0.00711342,
+          "exact_probability": 0.001824116,
           "fair_probability": 0.006
         }
       ],
-      "published_at": "2026-11-14T03:02:20.379371+00:00"
+      "published_at": "2026-11-14T10:39:13.211046+00:00"
     },
     "evening": {
       "last_draw": "2026-11-13",
@@ -177,36 +177,36 @@
         {
           "group": "135",
           "representative": "315",
-          "model_probability": 0.007522112,
-          "exact_probability": 0.001846523,
-          "fair_probability": 0.006
-        },
-        {
-          "group": "235",
-          "representative": "325",
-          "model_probability": 0.007306435,
-          "exact_probability": 0.001846523,
+          "model_probability": 0.007530281,
+          "exact_probability": 0.001892229,
           "fair_probability": 0.006
         },
         {
           "group": "145",
           "representative": "415",
-          "model_probability": 0.00724377,
-          "exact_probability": 0.001817793,
+          "model_probability": 0.007253504,
+          "exact_probability": 0.001862788,
           "fair_probability": 0.006
         },
         {
-          "group": "125",
-          "representative": "125",
-          "model_probability": 0.007237621,
-          "exact_probability": 0.001556616,
+          "group": "235",
+          "representative": "325",
+          "model_probability": 0.007236586,
+          "exact_probability": 0.001800817,
           "fair_probability": 0.006
         },
         {
           "group": "358",
           "representative": "385",
-          "model_probability": 0.007191089,
+          "model_probability": 0.007181735,
           "exact_probability": 0.001834334,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "125",
+          "representative": "125",
+          "model_probability": 0.007163633,
+          "exact_probability": 0.001479879,
           "fair_probability": 0.006
         },
         {
@@ -219,22 +219,15 @@
         {
           "group": "158",
           "representative": "185",
-          "model_probability": 0.007141804,
-          "exact_probability": 0.001546341,
+          "model_probability": 0.007133584,
+          "exact_probability": 0.001507423,
           "fair_probability": 0.006
         },
         {
           "group": "123",
           "representative": "312",
-          "model_probability": 0.007133874,
-          "exact_probability": 0.001538769,
-          "fair_probability": 0.006
-        },
-        {
-          "group": "245",
-          "representative": "425",
-          "model_probability": 0.007042639,
-          "exact_probability": 0.001817793,
+          "model_probability": 0.007075552,
+          "exact_probability": 0.001576857,
           "fair_probability": 0.006
         },
         {
@@ -243,88 +236,95 @@
           "model_probability": 0.007029724,
           "exact_probability": 0.001800646,
           "fair_probability": 0.006
+        },
+        {
+          "group": "139",
+          "representative": "319",
+          "model_probability": 0.006980085,
+          "exact_probability": 0.001898474,
+          "fair_probability": 0.006
         }
       ],
-      "published_at": "2026-11-14T03:02:20.379371+00:00"
+      "published_at": "2026-11-14T10:39:13.211046+00:00"
     },
     "night": {
-      "last_draw": "2026-11-12",
-      "latest_result": "642",
-      "draws": 10348,
-      "target_draw": "2026-11-13T22:12:00-06:00",
+      "last_draw": "2026-11-13",
+      "latest_result": "810",
+      "draws": 10349,
+      "target_draw": "2026-11-14T22:12:00-06:00",
       "predictions": [
         {
           "group": "245",
           "representative": "425",
-          "model_probability": 0.007478446,
-          "exact_probability": 0.001665157,
+          "model_probability": 0.007345944,
+          "exact_probability": 0.001591795,
           "fair_probability": 0.006
         },
         {
-          "group": "249",
-          "representative": "429",
-          "model_probability": 0.007384018,
-          "exact_probability": 0.001894834,
-          "fair_probability": 0.006
-        },
-        {
-          "group": "259",
-          "representative": "259",
-          "model_probability": 0.007312516,
-          "exact_probability": 0.001481864,
+          "group": "258",
+          "representative": "825",
+          "model_probability": 0.007244026,
+          "exact_probability": 0.001403017,
           "fair_probability": 0.006
         },
         {
           "group": "235",
           "representative": "325",
-          "model_probability": 0.007296797,
-          "exact_probability": 0.001691474,
+          "model_probability": 0.007227865,
+          "exact_probability": 0.001647729,
           "fair_probability": 0.006
         },
         {
-          "group": "258",
-          "representative": "285",
-          "model_probability": 0.00724505,
-          "exact_probability": 0.001394586,
+          "group": "259",
+          "representative": "259",
+          "model_probability": 0.007193887,
+          "exact_probability": 0.001481864,
           "fair_probability": 0.006
         },
         {
-          "group": "239",
-          "representative": "329",
-          "model_probability": 0.007243035,
-          "exact_probability": 0.001924781,
-          "fair_probability": 0.006
-        },
-        {
-          "group": "459",
-          "representative": "459",
-          "model_probability": 0.007211435,
-          "exact_probability": 0.001796825,
-          "fair_probability": 0.006
-        },
-        {
-          "group": "256",
-          "representative": "256",
-          "model_probability": 0.007186733,
-          "exact_probability": 0.001322452,
-          "fair_probability": 0.006
-        },
-        {
-          "group": "248",
-          "representative": "482",
-          "model_probability": 0.007124416,
-          "exact_probability": 0.001623939,
+          "group": "249",
+          "representative": "429",
+          "model_probability": 0.007186058,
+          "exact_probability": 0.001811353,
           "fair_probability": 0.006
         },
         {
           "group": "125",
           "representative": "215",
-          "model_probability": 0.00712222,
-          "exact_probability": 0.001588738,
+          "model_probability": 0.007127079,
+          "exact_probability": 0.001655034,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "256",
+          "representative": "256",
+          "model_probability": 0.007121428,
+          "exact_probability": 0.001322452,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "239",
+          "representative": "329",
+          "model_probability": 0.007117703,
+          "exact_probability": 0.001875002,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "459",
+          "representative": "459",
+          "model_probability": 0.007081831,
+          "exact_probability": 0.001763264,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "124",
+          "representative": "412",
+          "model_probability": 0.007073932,
+          "exact_probability": 0.001891224,
           "fair_probability": 0.006
         }
       ],
-      "published_at": "2026-11-14T03:02:20.379371+00:00"
+      "published_at": "2026-11-14T10:39:13.211046+00:00"
     }
   },
   "forecasts": [
@@ -19255,6 +19255,338 @@
           "fair_probability": 0.006
         }
       ]
+    },
+    {
+      "session": "morning",
+      "target_draw": "2026-11-14",
+      "published_at": "2026-11-14T10:39:13.211046+00:00",
+      "source_through": {
+        "morning": "2026-11-13",
+        "day": "2026-11-13",
+        "evening": "2026-11-13",
+        "night": "2026-11-13"
+      },
+      "predictions": [
+        {
+          "group": "349",
+          "representative": "439",
+          "model_probability": 0.007535261,
+          "exact_probability": 0.001698192,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "345",
+          "representative": "435",
+          "model_probability": 0.007214887,
+          "exact_probability": 0.001729588,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "034",
+          "representative": "430",
+          "model_probability": 0.007207161,
+          "exact_probability": 0.002054956,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "459",
+          "representative": "495",
+          "model_probability": 0.007193852,
+          "exact_probability": 0.002138226,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "049",
+          "representative": "490",
+          "model_probability": 0.007083432,
+          "exact_probability": 0.002540467,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "346",
+          "representative": "364",
+          "model_probability": 0.007065067,
+          "exact_probability": 0.00148859,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "469",
+          "representative": "469",
+          "model_probability": 0.007063151,
+          "exact_probability": 0.001906579,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "149",
+          "representative": "419",
+          "model_probability": 0.007049196,
+          "exact_probability": 0.001729295,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "249",
+          "representative": "492",
+          "model_probability": 0.007026533,
+          "exact_probability": 0.001781855,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "359",
+          "representative": "395",
+          "model_probability": 0.006977164,
+          "exact_probability": 0.002018951,
+          "fair_probability": 0.006
+        }
+      ]
+    },
+    {
+      "session": "day",
+      "target_draw": "2026-11-14",
+      "published_at": "2026-11-14T10:39:13.211046+00:00",
+      "source_through": {
+        "morning": "2026-11-13",
+        "day": "2026-11-13",
+        "evening": "2026-11-13",
+        "night": "2026-11-13"
+      },
+      "predictions": [
+        {
+          "group": "239",
+          "representative": "329",
+          "model_probability": 0.007506516,
+          "exact_probability": 0.001819745,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "249",
+          "representative": "429",
+          "model_probability": 0.007493495,
+          "exact_probability": 0.001896022,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "234",
+          "representative": "324",
+          "model_probability": 0.007302523,
+          "exact_probability": 0.001550375,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "235",
+          "representative": "325",
+          "model_probability": 0.007261611,
+          "exact_probability": 0.001735941,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "349",
+          "representative": "439",
+          "model_probability": 0.007257701,
+          "exact_probability": 0.001682343,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "245",
+          "representative": "425",
+          "model_probability": 0.007175322,
+          "exact_probability": 0.001808705,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "238",
+          "representative": "328",
+          "model_probability": 0.007168182,
+          "exact_probability": 0.001571326,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "259",
+          "representative": "295",
+          "model_probability": 0.007151708,
+          "exact_probability": 0.001460931,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "289",
+          "representative": "829",
+          "model_probability": 0.007117302,
+          "exact_probability": 0.001462879,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "359",
+          "representative": "395",
+          "model_probability": 0.00711342,
+          "exact_probability": 0.001824116,
+          "fair_probability": 0.006
+        }
+      ]
+    },
+    {
+      "session": "evening",
+      "target_draw": "2026-11-14",
+      "published_at": "2026-11-14T10:39:13.211046+00:00",
+      "source_through": {
+        "morning": "2026-11-13",
+        "day": "2026-11-13",
+        "evening": "2026-11-13",
+        "night": "2026-11-13"
+      },
+      "predictions": [
+        {
+          "group": "135",
+          "representative": "315",
+          "model_probability": 0.007530281,
+          "exact_probability": 0.001892229,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "145",
+          "representative": "415",
+          "model_probability": 0.007253504,
+          "exact_probability": 0.001862788,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "235",
+          "representative": "325",
+          "model_probability": 0.007236586,
+          "exact_probability": 0.001800817,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "358",
+          "representative": "385",
+          "model_probability": 0.007181735,
+          "exact_probability": 0.001834334,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "125",
+          "representative": "125",
+          "model_probability": 0.007163633,
+          "exact_probability": 0.001479879,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "345",
+          "representative": "435",
+          "model_probability": 0.007157545,
+          "exact_probability": 0.001520827,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "158",
+          "representative": "185",
+          "model_probability": 0.007133584,
+          "exact_probability": 0.001507423,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "123",
+          "representative": "312",
+          "model_probability": 0.007075552,
+          "exact_probability": 0.001576857,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "359",
+          "representative": "359",
+          "model_probability": 0.007029724,
+          "exact_probability": 0.001800646,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "139",
+          "representative": "319",
+          "model_probability": 0.006980085,
+          "exact_probability": 0.001898474,
+          "fair_probability": 0.006
+        }
+      ]
+    },
+    {
+      "session": "night",
+      "target_draw": "2026-11-14",
+      "published_at": "2026-11-14T10:39:13.211046+00:00",
+      "source_through": {
+        "morning": "2026-11-13",
+        "day": "2026-11-13",
+        "evening": "2026-11-13",
+        "night": "2026-11-13"
+      },
+      "predictions": [
+        {
+          "group": "245",
+          "representative": "425",
+          "model_probability": 0.007345944,
+          "exact_probability": 0.001591795,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "258",
+          "representative": "825",
+          "model_probability": 0.007244026,
+          "exact_probability": 0.001403017,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "235",
+          "representative": "325",
+          "model_probability": 0.007227865,
+          "exact_probability": 0.001647729,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "259",
+          "representative": "259",
+          "model_probability": 0.007193887,
+          "exact_probability": 0.001481864,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "249",
+          "representative": "429",
+          "model_probability": 0.007186058,
+          "exact_probability": 0.001811353,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "125",
+          "representative": "215",
+          "model_probability": 0.007127079,
+          "exact_probability": 0.001655034,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "256",
+          "representative": "256",
+          "model_probability": 0.007121428,
+          "exact_probability": 0.001322452,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "239",
+          "representative": "329",
+          "model_probability": 0.007117703,
+          "exact_probability": 0.001875002,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "459",
+          "representative": "459",
+          "model_probability": 0.007081831,
+          "exact_probability": 0.001763264,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "124",
+          "representative": "412",
+          "model_probability": 0.007073932,
+          "exact_probability": 0.001891224,
+          "fair_probability": 0.006
+        }
+      ]
     }
   ],
   "results": [
@@ -25770,6 +26102,91 @@
       "fair_top_1": 0.006,
       "fair_top_5": 0.03,
       "estimated_coverage": 0.072087
+    },
+    {
+      "session": "night",
+      "draw_date": "2026-11-13",
+      "actual": "810",
+      "verified_at": "2026-11-14T10:39:13.211046+00:00",
+      "published_at": "2026-11-14T03:02:20.379371+00:00",
+      "predictions": [
+        {
+          "group": "245",
+          "representative": "425",
+          "model_probability": 0.007478446,
+          "exact_probability": 0.001665157,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "249",
+          "representative": "429",
+          "model_probability": 0.007384018,
+          "exact_probability": 0.001894834,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "259",
+          "representative": "259",
+          "model_probability": 0.007312516,
+          "exact_probability": 0.001481864,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "235",
+          "representative": "325",
+          "model_probability": 0.007296797,
+          "exact_probability": 0.001691474,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "258",
+          "representative": "285",
+          "model_probability": 0.00724505,
+          "exact_probability": 0.001394586,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "239",
+          "representative": "329",
+          "model_probability": 0.007243035,
+          "exact_probability": 0.001924781,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "459",
+          "representative": "459",
+          "model_probability": 0.007211435,
+          "exact_probability": 0.001796825,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "256",
+          "representative": "256",
+          "model_probability": 0.007186733,
+          "exact_probability": 0.001322452,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "248",
+          "representative": "482",
+          "model_probability": 0.007124416,
+          "exact_probability": 0.001623939,
+          "fair_probability": 0.006
+        },
+        {
+          "group": "125",
+          "representative": "215",
+          "model_probability": 0.00712222,
+          "exact_probability": 0.001588738,
+          "fair_probability": 0.006
+        }
+      ],
+      "hit_rank": null,
+      "exact_hit": false,
+      "fair_coverage": 0.06,
+      "fair_top_1": 0.006,
+      "fair_top_5": 0.03,
+      "estimated_coverage": 0.072605
     }
   ],
   "backtest": {
@@ -25811,7 +26228,7 @@
       "fair_top_1": 0.0060000000000000045,
       "fair_top_5": 0.030000000000000027,
       "fair_top_10": 0.06000000000000005,
-      "estimated_top_10": 0.07542672500000001
+      "estimated_top_10": 0.075395385
     }
   },
   "forward": {
@@ -25846,15 +26263,15 @@
       "estimated_top_10": 0.07577542105263159
     },
     "night": {
-      "draws": 18,
+      "draws": 19,
       "top_1": 0.0,
       "top_5": 0.0,
       "top_10": 0.0,
       "fair_top_1": 0.006000000000000002,
-      "fair_top_5": 0.030000000000000013,
-      "fair_top_10": 0.060000000000000026,
-      "estimated_top_10": 0.07402661111111111
+      "fair_top_5": 0.030000000000000016,
+      "fair_top_10": 0.06000000000000003,
+      "estimated_top_10": 0.0739517894736842
     }
   },
-  "official_checked_at": "2026-11-14T03:02:20.379371+00:00"
+  "official_checked_at": "2026-11-14T10:39:13.211046+00:00"
 }
