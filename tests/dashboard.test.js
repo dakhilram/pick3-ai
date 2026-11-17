@@ -61,6 +61,9 @@ test("freshness follows the actual target timestamp and official draw state", ()
   assert.equal(freshness(item, new Date("2026-10-23T17:01:00Z")), "Update Delayed");
   assert.equal(freshness({...item, last_draw: "2026-10-23"}, new Date("2026-10-23T15:06:00Z")), "Update Delayed");
   assert.equal(freshness({target_draw: null}, new Date()), "Update Delayed");
+  const future = {target_draw: "2026-10-23T12:27:00-05:00", last_draw: "2026-10-22"};
+  assert.equal(freshness(future, new Date("2026-10-23T15:30:00Z"), {morning: item, day: future}),
+    "Awaiting Official Result");
 });
 
 test("next scheduled session handles Sundays and both DST offsets", () => {

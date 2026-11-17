@@ -268,12 +268,29 @@ def save_atomic(path, data):
 def main():
     previous = json.loads(OUTPUT.read_text(encoding='utf-8')) if OUTPUT.exists() else None
     legacy = json.loads(LEGACY.read_text(encoding='utf-8')) if previous and previous.get('schema_version') == 8 and LEGACY.exists() else None
+    previous_count = len(previous.get('results', [])) if previous else 0
     data, changed = update(fetch_official(), previous, legacy)
     if changed:
         save_atomic(OUTPUT, data)
         print('Published', len(data['results']), 'official records and four forecasts')
+        for record in data['results'][previous_count:]:
+            if not record.get('verified_at'):
+                continue
+            draw_at = scheduled_at(record['session'], record['draw_date'])
+            verified_at = datetime.fromisoformat(record['verified_at'])
+            delay = (verified_at - draw_at).total_seconds() / 60
+            label = f"{record['session']} {record['draw_date']} {record['actual']}"
+            print(f'Official {label}: verified and published {delay:.1f} minutes after draw')
+            if delay > 60:
+                print(f'::warning title=Late Pick3 update::{label} took {delay:.1f} minutes')
     else:
         print('No new official draw; publication unchanged')
+        now = datetime.now(timezone.utc)
+        for session, item in data['sessions'].items():
+            target = datetime.fromisoformat(item['target_draw'])
+            if item['last_draw'] < target.date().isoformat() and (now - target).total_seconds() > 7200:
+                print(f'::warning title=Pick3 awaiting result::{session} {target.date()} '
+                      'passed two hours ago without an official update')
 
 
 if __name__ == '__main__':

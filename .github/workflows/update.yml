@@ -17,24 +17,36 @@ on:
     - cron: '6,26,56 23,0 * * *'
     - cron: '18,38,58 3,4 * * *'
     - cron: '18 5 * * *'
+    # Independent backup checks reduce the impact of delayed or dropped cron events.
+    - cron: '7,37 0-5,15-19,23 * * *'
 permissions:
+  actions: read
   contents: write
   pages: write
   id-token: write
-concurrency:
-  group: pages
-  cancel-in-progress: false
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pick3-updater
+      cancel-in-progress: false
+      queue: max
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
+      - name: Log scheduler timing
+        env:
+          CRON: ${{ github.event.schedule }}
+        run: |
+          echo "Trigger: $GITHUB_EVENT_NAME; cron: ${CRON:-manual-or-push}"
+          date -u '+Updater started %Y-%m-%dT%H:%M:%SZ'
       - name: Install IANA time-zone data
         run: python -m pip install 'tzdata>=2025.2'
       - name: Test lightweight model and schedule
@@ -79,16 +91,44 @@ jobs:
             git push origin HEAD:main
             echo 'changed=true' >> "$GITHUB_OUTPUT"
           fi
-      # Commits made with GITHUB_TOKEN do not trigger pages.yml.
-      - uses: actions/configure-pages@v5
-        if: steps.commit.outputs.changed == 'true'
-      - name: Package V2 dashboard
-        if: steps.commit.outputs.changed == 'true'
+  # GITHUB_TOKEN data commits do not trigger pages.yml. Deploy explicitly.
+  deploy:
+    needs: refresh
+    if: needs.refresh.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: pick3-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Package latest V2 dashboard
         run: python scripts/package_site.py
+      - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
-        if: steps.commit.outputs.changed == 'true'
         with:
           path: site-dist
+      - name: Wait for artifact indexing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for attempt in {1..12}; do
+            count=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" \
+              --jq '[.artifacts[] | select(.name == "github-pages")] | length')
+            if [ "$count" -ge 1 ]; then exit 0; fi
+            sleep 5
+          done
+          echo '::error::Pages artifact was not indexed after one minute'
+          exit 1
       - id: deployment
         uses: actions/deploy-pages@v4
-        if: steps.commit.outputs.changed == 'true'
+      - name: Verify live commit and dataset
+        run: python scripts/verify_site.py

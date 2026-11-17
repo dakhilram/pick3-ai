@@ -45,14 +45,21 @@ const combination = number => [...number].sort().join("");
 const numbers = item => item.predictions.map(pick => pick.group);
 const allNumbersText = item => numbers(item).join(", ");
 
-function freshness(item, now = new Date()) {
+function freshness(item, now = new Date(), sessions = null) {
+  const candidates = sessions ? Object.values(sessions) : [item];
+  const pending = candidates.map(candidate => ({
+    target: Date.parse(candidate?.target_draw),
+    drawDate: candidate?.target_draw?.slice(0, 10),
+    lastDraw: candidate?.last_draw || ""
+  })).filter(candidate => Number.isFinite(candidate.target) && candidate.target <= now.getTime() &&
+    candidate.lastDraw < candidate.drawDate);
+  if (pending.length) {
+    const oldest = Math.min(...pending.map(candidate => candidate.target));
+    return now.getTime() - oldest < 2 * 60 * 60 * 1000 ? "Awaiting Official Result" : "Update Delayed";
+  }
   const target = Date.parse(item?.target_draw);
   if (!Number.isFinite(target)) return "Update Delayed";
   if (target > now.getTime()) return "Current";
-  const drawDate = item.target_draw.slice(0, 10);
-  if ((item.last_draw || "") < drawDate && now.getTime() - target < 2 * 60 * 60 * 1000) {
-    return "Awaiting Official Result";
-  }
   return "Update Delayed";
 }
 
@@ -139,7 +146,7 @@ function renderTop(now = new Date()) {
   const next = nextScheduled(now);
   const session = selectedSession || next.session;
   const item = data.sessions[session];
-  const state = freshness(item, now);
+  const state = freshness(item, now, data.sessions);
   $("sessionSelect").value = session;
   $("nextTitle").textContent = `${title(next.session)} · ${next.label} · ${next.time} Central`;
   $("nextMeta").textContent = "Drawing times shown in America/Chicago.";
@@ -161,7 +168,7 @@ function renderSessions(now = new Date()) {
     heading.append(el("h3", null, title(session)));
     if (upcoming) heading.append(el("span", "next-tag", "Next drawing"));
     card.append(heading,
-      el("p", "muted", `Forecast for ${item.target_draw.slice(0, 10)} · ${freshness(item, now)}`),
+      el("p", "muted", `Forecast for ${item.target_draw.slice(0, 10)} · ${freshness(item, now, data.sessions)}`),
       el("p", "session-numbers", numbers(item).join(" · ")));
     const button = el("button", "text-button", `View ${title(session)} Top 10`);
     button.type = "button";

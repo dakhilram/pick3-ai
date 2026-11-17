@@ -8,7 +8,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from schedule_gate import CENTRAL, next_draw, scheduled_at
 from v2 import parse, events, rank, score, update, summarize, save_atomic, forward_metrics
-from package_site import ASSETS, package
+from package_site import ASSETS, OUTPUTS, package
+from verify_site import matches_live
 
 
 class V2Tests(unittest.TestCase):
@@ -107,8 +108,16 @@ class V2Tests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             output = package(Path(directory) / 'site')
             files = {p.relative_to(output).as_posix() for p in output.rglob('*') if p.is_file()}
-            self.assertEqual(files, set(ASSETS))
+            self.assertEqual(files, set(OUTPUTS))
             self.assertEqual(json.loads((output / 'data/predictions.json').read_text())['schema_version'], 9)
+            manifest = json.loads((output / 'deployment.json').read_text())
+            self.assertEqual(set(manifest['assets']), set(ASSETS))
+            self.assertEqual(len(manifest['commit_sha']), 40)
+            fetch = lambda relative: (output / relative).read_bytes()
+            self.assertTrue(matches_live(manifest, fetch)[0])
+            self.assertFalse(matches_live(dict(manifest, commit_sha='0' * 40), fetch)[0])
+            self.assertFalse(matches_live(manifest, lambda relative: b'changed' if relative == 'app.js'
+                                          else fetch(relative))[0])
 
 
 if __name__ == '__main__':
