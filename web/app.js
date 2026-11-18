@@ -7,6 +7,8 @@ const $ = id => document.getElementById(id);
 let data = null;
 let selectedSession = null;
 let feedbackTimer = null;
+let manualRefreshing = false;
+let refreshCounter = 0;
 
 function localParts(instant) {
   return Object.fromEntries(new Intl.DateTimeFormat("en-US", {
@@ -64,7 +66,8 @@ function freshness(item, now = new Date(), sessions = null) {
 }
 
 function valid(dataset) {
-  if (dataset?.schema_version !== 9 || !dataset.generated_at || !dataset.sessions || !Array.isArray(dataset.results)) {
+  if (dataset?.schema_version !== 9 || !Number.isFinite(Date.parse(dataset.generated_at)) ||
+      !dataset.sessions || !Array.isArray(dataset.results)) {
     throw Error("Published data needs a V2 refresh.");
   }
   for (const session of SESSIONS) {
@@ -248,19 +251,62 @@ function render() {
   $("status").textContent = "Forecast data connected";
 }
 
-async function refresh() {
+function refreshMessage(message, error = false) {
+  const target = $("refreshFeedback");
+  target.textContent = message;
+  target.className = "refresh-feedback" + (error ? " error" : "");
+}
+
+function refreshLoading(loading) {
+  const button = $("refreshLatest");
+  button.disabled = loading;
+  button.className = "refresh-button" + (loading ? " is-loading" : "");
+  $("refreshButtonText").textContent = loading ? "Checking latest results..." : "Refresh Latest Results";
+  if (loading) refreshMessage("Checking latest results...");
+}
+
+async function refresh({manual = false} = {}) {
+  if (manual && manualRefreshing) return;
+  if (manual) {
+    manualRefreshing = true;
+    refreshLoading(true);
+  }
   try {
-    const response = await fetch("data/predictions.json", {cache: "no-store"});
+    const url = manual ? `data/predictions.json?refresh=${Date.now()}-${++refreshCounter}` : "data/predictions.json";
+    const response = await fetch(url, {cache: "no-store"});
     if (!response.ok) throw Error(`Data request failed (${response.status}).`);
     const incoming = valid(await response.json());
-    const previous = data?.generated_at;
-    data = incoming;
-    if (!$("historyDate").value) $("historyDate").value = data.results.map(row => row.draw_date).sort().at(-1) || nextScheduled().date;
-    if (previous !== data.generated_at) render();
-    else { renderTop(); renderSessions(); }
+    const previousTime = data ? Date.parse(data.generated_at) : -Infinity;
+    const incomingTime = Date.parse(incoming.generated_at);
+    if (incomingTime > previousTime) {
+      const previousData = data;
+      data = incoming;
+      try {
+        if (!$("historyDate").value) $("historyDate").value = data.results.map(row => row.draw_date).sort().at(-1) || nextScheduled().date;
+        render();
+      } catch (error) {
+        data = previousData;
+        if (data) render();
+        throw error;
+      }
+    } else if (data && manual) {
+      render();
+    } else if (data) {
+      renderTop();
+      renderSessions();
+    }
+    $("checkedAt").textContent = `Last checked ${when(new Date())}`;
+    if (manual) refreshMessage(incomingTime > previousTime ? "Updated just now" :
+      incomingTime === previousTime ? "Already up to date." : "No newer data available. Showing the latest loaded forecast.");
     $("status").textContent = "Forecast data connected";
   } catch (error) {
+    if (manual) refreshMessage(`Refresh failed: ${error.message}. ${data ? "Showing the last loaded data." : "No forecast is loaded yet."}`, true);
     $("status").textContent = error.message;
+  } finally {
+    if (manual) {
+      manualRefreshing = false;
+      refreshLoading(false);
+    }
   }
 }
 
@@ -271,6 +317,7 @@ if (typeof document !== "undefined") {
     if (data) renderTop();
   });
   $("copyAll").addEventListener("click", () => data && copyAll());
+  $("refreshLatest").addEventListener("click", () => refresh({manual: true}));
   refresh();
   setInterval(() => { if (!document.hidden) refresh(); }, 120000);
   setInterval(() => { if (data) { renderTop(); renderSessions(); } }, 60000);

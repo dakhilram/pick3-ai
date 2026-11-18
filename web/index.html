@@ -23,8 +23,16 @@
         <h1>Ten numbers for the next draw.</h1>
         <p>The model ranks three-digit outcomes and groups numbers with the same digits. Digits are shown in sorted order for consistency; the rank applies to the combination.</p>
         <div class="summary-strip">
-          <p><span>Last verified official result</span><strong id="latestResult">Checking…</strong></p>
-          <p><span>Predictions generated</span><strong id="generatedAt">Checking…</strong></p>
+          <div class="summary-item"><span>Last verified official result</span><strong id="latestResult">Checking…</strong></div>
+          <div class="summary-item summary-update">
+            <span>Forecast published</span><strong id="generatedAt">Checking…</strong>
+            <button id="refreshLatest" class="refresh-button" type="button">
+              <span class="refresh-spinner" aria-hidden="true"></span>
+              <span id="refreshButtonText">Refresh Latest Results</span>
+            </button>
+            <span id="refreshFeedback" class="refresh-feedback" role="status" aria-live="polite"></span>
+            <small id="checkedAt" class="checked-at"></small>
+          </div>
         </div>
       </section>
 

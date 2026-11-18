@@ -127,3 +127,132 @@ test("rendered picks, session selection, history, and copy buttons use published
   ids.historyDate.events.change();
   assert.match(ids.history.children[0].textContent, /No verified official result/);
 });
+
+async function bootDashboard(dataset) {
+  const ids = {}, requests = [], intervals = [];
+  let fetchResponse = async () => ({ok: true, json: async () => dataset});
+  class Element {
+    constructor(tag) { this.tag = tag; this.children = []; this.events = {}; this.style = {}; this.value = ""; }
+    append(...children) { this.children.push(...children); }
+    replaceChildren(...children) { this.children = children; }
+    addEventListener(name, callback) { this.events[name] = callback; }
+    setAttribute() {}
+  }
+  const document = {
+    getElementById(id) { return ids[id] ||= new Element(id); },
+    createElement(tag) { return new Element(tag); },
+    querySelector() { return {scrollIntoView() {}}; },
+    hidden: false
+  };
+  const FixedDate = class extends Date {
+    constructor(...args) { super(...(args.length ? args : ["2026-11-17T20:00:00Z"])); }
+  };
+  const context = {
+    document, Date: FixedDate, Intl, console,
+    fetch: (url, options) => { requests.push({url, options}); return fetchResponse(url, options); },
+    setInterval(callback, ms) { intervals.push({callback, ms}); },
+    setTimeout() {}, clearTimeout() {}
+  };
+  context.globalThis = context;
+  vm.runInNewContext(fs.readFileSync(require.resolve("../web/app.js"), "utf8"), context);
+  await new Promise(setImmediate);
+  return {ids, requests, intervals, setFetch(callback) { fetchResponse = callback; }};
+}
+
+test("hard refresh bypasses cache, shows loading, updates every section, and keeps selections", async () => {
+  const original = structuredClone(published);
+  const harness = await bootDashboard(original);
+  const {ids, requests} = harness;
+  ids.sessionSelect.value = "night";
+  ids.sessionSelect.events.change({target: ids.sessionSelect});
+  ids.historyDate.value = "2026-11-16";
+  ids.historyDate.events.change();
+  const before = {picks: ids.topPicks.children, sessions: ids.sessions.children,
+    history: ids.history.children, metrics: ids.metrics.children};
+  const updated = structuredClone(original);
+  updated.generated_at = new Date(Date.parse(original.generated_at) + 60000).toISOString();
+  [updated.sessions.night.predictions[0], updated.sessions.night.predictions[1]] =
+    [updated.sessions.night.predictions[1], updated.sessions.night.predictions[0]];
+  updated.results.push({session: "night", draw_date: "2026-11-17", actual: "007",
+    verified_at: updated.generated_at, published_at: original.generated_at,
+    predictions: updated.sessions.night.predictions});
+  let finishFetch;
+  harness.setFetch(() => new Promise(resolve => { finishFetch = resolve; }));
+  const first = ids.refreshLatest.events.click();
+  assert.equal(ids.refreshLatest.disabled, true);
+  assert.match(ids.refreshLatest.className, /is-loading/);
+  assert.equal(ids.refreshButtonText.textContent, "Checking latest results...");
+  assert.equal(ids.refreshFeedback.textContent, "Checking latest results...");
+  const firstUrl = requests.at(-1).url;
+  assert.match(firstUrl, /^data\/predictions\.json\?refresh=\d+-\d+$/);
+  assert.equal(requests.at(-1).options.cache, "no-store");
+  await ids.refreshLatest.events.click();
+  assert.equal(requests.at(-1).url, firstUrl);
+  finishFetch({ok: true, json: async () => updated});
+  await first;
+  assert.equal(ids.refreshLatest.disabled, false);
+  assert.equal(ids.refreshButtonText.textContent, "Refresh Latest Results");
+  assert.equal(ids.refreshFeedback.textContent, "Updated just now");
+  assert.match(ids.checkedAt.textContent, /^Last checked /);
+  assert.match(ids.latestResult.textContent, /Night 007/);
+  assert.equal(ids.sessionSelect.value, "night");
+  assert.equal(ids.historyDate.value, "2026-11-16");
+  assert.equal(ids.topPicks.children[0].children[1].textContent, updated.sessions.night.predictions[0].group);
+  for (const [key, id] of Object.entries({picks: "topPicks", sessions: "sessions", history: "history", metrics: "metrics"})) {
+    assert.notEqual(ids[id].children, before[key]);
+  }
+
+  harness.setFetch(async () => ({ok: true, json: async () => updated}));
+  await ids.refreshLatest.events.click();
+  assert.equal(ids.refreshFeedback.textContent, "Already up to date.");
+  assert.notEqual(requests.at(-1).url, firstUrl);
+  assert.equal(ids.sessionSelect.value, "night");
+  assert.equal(ids.historyDate.value, "2026-11-16");
+});
+
+test("failed and older refresh responses preserve the latest loaded forecast", async () => {
+  const original = structuredClone(published);
+  const harness = await bootDashboard(original);
+  const {ids, requests, intervals} = harness;
+  const updated = structuredClone(original);
+  updated.generated_at = new Date(Date.parse(original.generated_at) + 60000).toISOString();
+  updated.sessions.morning.predictions.reverse();
+  harness.setFetch(async () => ({ok: true, json: async () => updated}));
+  await ids.refreshLatest.events.click();
+  const latestNumber = updated.sessions.morning.predictions[0].group;
+  ids.sessionSelect.value = "morning";
+  ids.sessionSelect.events.change({target: ids.sessionSelect});
+  assert.equal(ids.topPicks.children[0].children[1].textContent, latestNumber);
+
+  harness.setFetch(async () => { throw Error("offline"); });
+  await ids.refreshLatest.events.click();
+  assert.match(ids.refreshFeedback.textContent, /Refresh failed: offline/);
+  assert.match(ids.refreshFeedback.className, /error/);
+  assert.equal(ids.refreshLatest.disabled, false);
+  assert.equal(ids.topPicks.children[0].children[1].textContent, latestNumber);
+
+  const malformed = structuredClone(updated);
+  malformed.generated_at = new Date(Date.parse(updated.generated_at) + 120000).toISOString();
+  malformed.results = [{session: "morning", draw_date: ids.historyDate.value,
+    actual: null, predictions: [{group: "007"}]}];
+  harness.setFetch(async () => ({ok: true, json: async () => malformed}));
+  await ids.refreshLatest.events.click();
+  assert.match(ids.refreshFeedback.textContent, /Refresh failed/);
+  assert.equal(ids.topPicks.children[0].children[1].textContent, latestNumber);
+
+  harness.setFetch(async () => ({ok: true, json: async () => original}));
+  await ids.refreshLatest.events.click();
+  assert.match(ids.refreshFeedback.textContent, /No newer data available/);
+  assert.equal(ids.topPicks.children[0].children[1].textContent, latestNumber);
+  assert.equal(requests.at(-1).options.cache, "no-store");
+
+  const later = structuredClone(updated);
+  later.generated_at = new Date(Date.parse(updated.generated_at) + 60000).toISOString();
+  harness.setFetch(async () => ({ok: true, json: async () => later}));
+  intervals.find(timer => timer.ms === 120000).callback();
+  await new Promise(setImmediate);
+  assert.equal(ids.generatedAt.textContent, new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Chicago", dateStyle: "medium", timeStyle: "short"
+  }).format(new Date(later.generated_at)) + " Central");
+  assert.equal(requests.at(-1).url, "data/predictions.json");
+});
